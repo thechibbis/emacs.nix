@@ -1,0 +1,632 @@
+#+TITLE: Emacs configuration file
+#+AUTHOR: Guilherme Menezes
+#+PROPERTY: header-args:emacs-lisp :tangle yes
+
+* Init
+#+BEGIN_SRC emacs-lisp
+  (setq gc-cons-theshold (* 50 1000 1000))
+  (setq create-lockfiles nil)
+
+  (setq backup-directory-alist
+	`(("." . ,(concat user-emacs-directory "backups"))))
+#+END_SRC
+
+
+* Better Default
+#+BEGIN_SRC emacs-lisp
+(when window-system
+  (blink-cursor-mode 0) ; Disable the cursor blinking
+  (scroll-bar-mode 0)   ; Disable the scroll bar
+  (tool-bar-mode 0)     ; Disable the tool bar
+  (tooltip-mode 0))     ; Disable the tooltips
+
+
+
+(setq-default
+ ad-redefinition-action 'accept                   ; Silence warnings for redefinition
+ auto-window-vscroll nil                          ; Lighten vertical scroll
+ confirm-kill-emacs 'yes-or-no-p                  ; Confirm before exiting Emacs
+ cursor-in-non-selected-windows nil               ; Hide the cursor in inactive windows
+ delete-by-moving-to-trash t                      ; Delete files to trash
+ display-time-default-load-average nil            ; Don't display load average
+ display-time-format "%H:%M"                      ; Format the time string
+ fill-column 80                                   ; Set width for automatic line breaks
+ help-window-select t                             ; Focus new help windows when opened
+ indent-tabs-mode nil                             ; Use tabs to indent
+ inhibit-startup-screen t                         ; Disable start-up screen
+ initial-scratch-message ""                       ; Empty the initial *scratch* buffer
+ mouse-yank-at-point t                            ; Yank at point rather than pointer
+ ns-use-srgb-colorspace nil                       ; Don't use sRGB colors
+ select-enable-clipboard t                        ; Merge system's and Emacs' clipboard
+ sentence-end-double-space nil                    ; End a sentence after a dot and a space
+ show-help-function nil                           ; Disable help messages
+ show-trailing-whitespace t                       ; Display trailing whitespaces
+ split-height-threshold nil                       ; Disable vertical window splitting
+ split-width-threshold nil                        ; Disable horizontal window splitting
+ tab-width 4                                      ; Set width for tabs
+ uniquify-buffer-name-style 'forward              ; Uniquify buffer names
+ window-combination-resize t                      ; Resize windows proportionally
+ x-stretch-cursor t                               ; Stretch cursor to the glyph width
+ delete-old-versions -1                           ; Delete excess backup versions silently
+ version-control t                                ; Use version control
+ ring-bell-function 'ignore                       ; Silent bell when you make a mistake
+ inhibit-compacting-font-caches t                 ; Faster navigation point (costs more memory)
+ recentf-mode t                                   ; Keep recent files
+ make-backup-files nil                            ; Stop creating backup files
+ display-line-numbers-type 'relative              ; Use relative line numbers
+ vc-follow-symlinks t                             ; When the symlink points to a version-controlled file
+ use-default-font-for-symbols nil                 ; Do not use the frame font when rendering emojis
+ frame-inhibit-implied-resize nil)                ; Don't ask for confirmation when opening symlinked file
+(cd "~/")                                         ; Move to the user directory
+(global-display-line-numbers-mode t)              ; Enable line numbers globally
+(delete-selection-mode 1)                         ; Replace region when inserting text
+(display-time-mode 1)                             ; Enable time in the mode-line
+(global-auto-revert-mode 1)                       ; Automatically revert a buffer when it changes on disk
+(fringe-mode '(8 . 0))                            ; Enable fringe on the left for git-gutter-fringe+
+(electric-pair-mode t)                            ; Enable Matching delimeters
+(electric-indent-mode t)                          ; Auto indentation
+(fset 'yes-or-no-p 'y-or-n-p)                     ; Replace yes/no prompts with y/n
+(global-subword-mode 1)                           ; Iterate through CamelCase words
+(menu-bar-mode 0)                                 ; Disable the menu bar
+(mouse-avoidance-mode 'jump)                      ; Avoid collision of mouse with point
+(put 'downcase-region 'disabled nil)              ; Enable downcase-region
+(put 'upcase-region 'disabled nil)                ; Enable upcase-region
+(show-paren-mode 1)                               ; Highlight matching parenthesis
+#+END_SRC
+
+
+* Appearance
+** Tweaks
+#+BEGIN_SRC emacs-lisp 
+  (set-face-attribute 'default nil :font "FiraCode Nerd Font Mono" :height 85)
+#+END_SRC
+** Doom Themes
+#+BEGIN_SRC emacs-lisp
+(use-package doom-themes
+  :ensure t
+  :custom
+  (doom-themes-enable-bold t)   ; if nil, bold is universally disabled
+  (doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (doom-themes-treemacs-theme "doom-colors") ; use "doom-colors" for less minimal icon theme
+  :config
+  (doom-themes-visual-bell-config)
+  (doom-themes-treemacs-config)
+  (doom-themes-org-config))
+
+(use-package catppuccin-theme)
+(use-package ef-themes)
+
+(load-theme 'ef-winter)
+
+;;(setq catppuccin-flavor 'mocha)
+;;(catppuccin-reload)
+#+END_SRC
+
+** Doom Modeline
+#+BEGIN_SRC emacs-lisp
+(use-package doom-modeline
+  :init (doom-modeline-mode 1)
+  :custom
+  (doom-modeline-major-mode-icon t)
+  (doom-modeline-major-mode-color-icon t)
+  (doom-modeline-icon (display-graphic-p))
+  (doom-modeline-modal-modern-icon t)
+  (doom-modeline-buffer-modification-icon nil)
+  (doom-modeline-flycheck-icon t)
+  (doom-modeline-checker-simple-format t)
+  (doom-modeline-height 25)
+  (doom-modeline-buffer-file-name-style 'file-name)
+  (doom-modeline-buffer-encoding nil))
+#+END_SRC
+** Indent Bars
+#+BEGIN_SRC emacs-lisp
+  (use-package indent-bars
+      :hook ((python-mode yaml-mode nix-mode rust-mode typescript-mode javascript-mode) . indent-bars-mode))
+#+END_SRC
+
+** All The Icons
+#+BEGIN_SRC emacs-lisp
+  (use-package all-the-icons
+      :if (display-graphic-p))
+#+END_SRC
+
+
+* Orgggggggggggggggggggg
+** Org
+#+BEGIN_SRC emacs-lisp
+(add-hook 'org-mode-hook 'visual-line-mode)
+
+(setq org-src-fontify-natively t
+      org-src-tab-acts-natively t
+      org-edit-src-content-indentation 0)
+
+(setq org-adapt-indentation t
+      org-hide-leading-stars t
+      org-hide-emphasis-markers t
+      org-pretty-entities t
+      org-ellipsis "..·")
+#+END_SRC
+** Org Indent
+#+BEGIN_SRC emacs-lisp
+  (require 'org-indent)
+  (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
+#+END_SRC
+** Org Roam
+#+BEGIN_SRC emacs-lisp
+(use-package org-roam
+  :custom
+  (org-roam-directory (file-truename "/home/thechibbis/org-files/"))
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n g" . org-roam-graph)
+         ("C-c n i" . org-roam-node-insert)
+         ("C-c n c" . org-roam-capture)
+         ;; Dailies
+         ("C-c n j" . org-roam-dailies-capture-today))
+  :config
+  ;; If you're using a vertical completion framework, you might want a more informative completion interface
+  (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+  (org-roam-db-autosync-mode)
+  ;; If using org-roam-protocol
+  (require 'org-roam-protocol))
+#+END_SRC
+** Org Modern
+#+BEGIN_SRC emacs-lisp
+  (dolist (face '(window-divider
+		window-divider-first-pixel
+		window-divider-last-pixel))
+    (face-spec-reset-face face)
+    (set-face-foreground face (face-attribute 'default :background)))
+  (set-face-background 'fringe (face-attribute 'default :background))
+
+    (setq
+     org-auto-align-tags t
+     org-tags-column 0
+     org-fold-catch-invisible-edits 'show-and-error
+     org-special-ctrl-a/e t
+     org-insert-heading-respect-content t
+
+     ;; Agenda styling
+     org-agenda-tags-column 0
+     org-agenda-time-grid
+     '((daily today require-timed)
+       (800 1000 1200 1400 1600 1800 2000)
+       " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+     org-agenda-current-time-string
+     "⭠ now ─────────────────────────────────────────────────")
+
+
+  (with-eval-after-load 'org (global-org-modern-mode))
+#+END_SRC
+** Org Superstar
+#+BEGIN_SRC emacs-lisp
+  (use-package org-superstar
+    :config
+    (setq org-superstar-leading-bullet " ")
+    (setq org-superstar-special-todo-items t) ;; Makes TODO header bullets into boxes
+    (setq org-superstar-todo-bullet-alist '(("TODO" . 9744)
+                                            ("DONE" . 9744)
+                                            ("READ" . 9744)
+                                            ("IDEA" . 9744)
+                                            ("WAITING" . 9744)
+                                            ("CANCELLED" . 9744)
+                                            ("PROJECT" . 9744)
+                                            ("POSTPONED" . 9744)))
+    )
+#+END_SRC
+
+
+
+* Packages
+** Autocomplete
+#+BEGIN_SRC emacs-lisp
+(use-package company
+  :defer 0.5
+  :straight t
+  :delight
+  :init (global-company-mode)
+  :custom
+  (company-begin-commands '(self-insert-command))
+  (company-minimum-prefix-length 1)
+  (company-idle-delay 0.0)
+  (company-tooltip-limit 15)
+  (company-show-numbers t)
+  (company-tooltip-align-annotations t)
+  :config
+  (add-to-list 'company-backends
+               '(company-yasnippet
+                 company-files
+                 company-keywords
+                 company-capf
+                 company-dabbrev
+                 company-dabbrev-code)))
+#+END_SRC
+** Dashboard
+#+BEGIN_SRC emacs-lisp
+  (use-package dashboard
+    :config
+    (setq dashboard-items '((recents   . 5)
+			    (bookmarks . 5)
+			    (projects  . 5)
+			    (agenda    . 5)
+			    (registers . 5)))
+    (dashboard-setup-startup-hook))
+#+END_SRC
+** Orderless
+#+BEGIN_SRC emacs-lisp
+  (use-package orderless
+    :custom
+    (completion-styles '(orderless))
+    (completion-category-defaults nil)
+    (completion-category-overrides '((file (styles partial-completion)))))
+#+END_SRC
+** Vertico
+#+BEGIN_SRC emacs-lisp
+(use-package vertico)
+(use-package vertico-posframe)
+
+(vertico-posframe-mode 1)
+(vertico-mode)
+(savehist-mode)
+#+END_SRC
+
+** Treemacs
+#+BEGIN_SRC emacs-lisp
+(use-package treemacs
+  :defer t
+  :init
+  (with-eval-after-load 'winum
+    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+  :config
+  (progn
+    (setq treemacs-litter-directories              '("/node_modules" "/.venv" "/.cask")
+	  treemacs-width                           35
+	  treemacs-no-png-images                   nil
+	  treemacs-workspace-switch-cleanup        t)
+
+    (treemacs-follow-mode t)
+    (treemacs-project-follow-mode t)
+    (treemacs-filewatch-mode t)
+    (treemacs-fringe-indicator-mode 'always)
+    (when treemacs-python-executable
+      (treemacs-git-commit-diff-mode t))
+
+    (pcase (cons (not (null (executable-find "git")))
+		 (not (null treemacs-python-executable)))
+      (`(t . t)
+       (treemacs-git-mode 'deferred))
+      (`(t . _)
+       (treemacs-git-mode 'simple)))
+
+    (treemacs-hide-gitignored-files-mode nil))
+
+  (defun my-treemacs-disable-line-numbers ()
+    "Disable line numbers in Treemacs buffers."
+    (when (derived-mode-p 'treemacs-mode)
+      (display-line-numbers-mode -1)))
+
+  (add-hook 'treemacs-mode-hook 'my-treemacs-disable-line-numbers)
+  :bind
+  (:map global-map
+	("M-0"       . treemacs-select-window)
+	("C-x t 1"   . treemacs-delete-other-windows)
+	("C-x t t"   . treemacs)
+	("C-x t d"   . treemacs-select-directory)
+	("C-x t B"   . treemacs-bookmark)
+	("C-x t C-t" . treemacs-find-file)
+	("C-x t M-t" . treemacs-find-tag)))
+
+(use-package treemacs-evil
+  :after (treemacs evil))
+
+(use-package treemacs-projectile
+  :after (treemacs projectile))
+
+(use-package treemacs-icons-dired
+  :hook (dired-mode . treemacs-icons-dired-enable-once))
+
+(use-package treemacs-magit
+  :after (treemacs magit))
+
+(use-package treemacs-persp ;;treemacs-perspective if you use perspective.el vs. persp-mode
+  :after (treemacs persp-mode) ;;or perspective vs. persp-mode
+  :config (treemacs-set-scope-type 'Perspectives))
+
+(use-package treemacs-tab-bar ;;treemacs-tab-bar if you use tab-bar-mode
+  :after (treemacs)
+  :config (treemacs-set-scope-type 'Tabs))
+
+(use-package treemacs-all-the-icons
+  :config
+  (treemacs-load-theme "all-the-icons"))
+#+END_SRC
+
+** Magit
+   #+BEGIN_SRC emacs-lisp
+(use-package magit
+  :defer t
+  :config
+  (global-set-key (kbd "C-x g") 'magit-status)
+  (add-hook 'magit-status-sections-hook 'magit-insert-stashes))
+
+;; Getting an alist-void error when running magit commands that refresh the buffer. Narrowed down to this variable so turning off for now
+(setq magit-section-cache-visibility nil)
+#+END_SRC
+
+
+** Smudge
+#+BEGIN_SRC emacs-lisp
+(use-package smudge
+  :bind-keymap ("C-c ." . smudge-command-map)
+  :custom
+  (smudge-oauth2-client-id "d9061b0925e44f66817775e876b0e97a")
+  (smudge-oauth2-client-secret "c63b2c4806914ebf8753a7870a339027")
+  (smudge-player-use-transient-map t)
+  :config
+  (global-smudge-remote-mode))
+#+END_SRC
+
+
+
+
+* Lsp
+** Treesit
+#+BEGIN_SRC emacs-lisp
+  (use-package treesit-auto
+      :custom
+      (treesit-auto-install 'prompt)
+      :config
+      (treesit-auto-add-to-auto-mode-alist 'all)
+      (global-treesit-auto-mode))
+#+END_SRC
+
+** Yasnippets
+   #+BEGIN_SRC emacs-lisp
+   (use-package yasnippet
+     :config (yas-global-mode 1))
+
+   (use-package yasnippet-snippets)
+#+END_SRC
+** Flycheck
+#+BEGIN_SRC emacs-lisp
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode)
+  :bind (:map flycheck-mode-map
+	      ("M-n" . flycheck-next-error) ; optional but recommended error navigation
+	      ("M-p" . flycheck-previous-error)))
+
+(add-hook 'after-init-hook #'global-flycheck-mode)
+#+END_SRC
+** lsp-mode
+#+BEGIN_SRC emacs-lisp
+(use-package lsp-mode
+  :init
+  (setq lsp-keymap-prefix "C-c l")
+  :hook ((lsp-mode . lsp-enable-which-key-integration)
+         (yaml-ts-mode . lsp-deferred)
+         (nix-ts-mode . lsp-deferred)
+         (go-ts-mode . lsp-deferred)
+         (protobuf-mode . lsp-deferred)))
+  :commands lsp
+  :config
+  (add-to-list 'lsp-language-id-configuration '(protobuf-mode . "protobuf"))
+
+  (lsp-register-client (make-lsp-client
+                        :new-connection (lsp-stdio-connection ("buf" "beta" "lsp" "--timeout" "0" "--log-format" "json"))
+                        :activation-fn (lsp-activate-on "protobuf")
+                        :server-id 'buf))
+
+  (setq lsp-enable-completion-at-point t
+        lsp-headerline-breadcrumb-enable nil
+        lsp-format-buffer-on-save t
+        lsp-auto-execute-action nil))
+
+(use-package lsp-ui
+  :commands lsp-ui-mode
+  :custom
+  (lsp-ui-sideline-enable t)
+  (lsp-ui-flycheck-enable t)
+  (lsp-ui-flycheck-live-reporting t)
+  (lsp-ui-sideline-toggle-symbols-info t)
+  (lsp-ui-sideline-show-hover t)
+  (lsp-ui-peek-enable t)
+  (lsp-idle-delay 0.500))
+
+(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+
+(setq completion-in-region-function
+      (lambda (&rest args)
+	    (apply (if vertico-mode
+		           #'consult-completion-in-region
+		         #'completion--in-region)
+	           args)))
+#+END_SRC
+
+** Modes
+*** Rust
+#+BEGIN_SRC emacs-lisp
+(use-package rust-mode
+    :init
+    (setq rust-mode-treesitter-derive t))
+
+(use-package rustic
+    :config
+    (setq rustic-format-on-save nil)
+    (setq lsp-rust-analyzer-cargo-watch-command "clippy")
+    :custom
+    (push 'rustic-clippy flycheck-checkers)
+    (rustic-cargo-use-last-stored-arguments t)
+    :after (rust-mode))
+
+
+#+END_SRC
+
+*** lsp-biome.el
+
+
+
+* Keymaps
+** Vim > Emacs
+#+BEGIN_SRC emacs-lisp
+  (use-package evil
+    :init
+    (setq evil-want-integration t)
+    (setq evil-want-keybinding nil)
+    :config
+    (evil-mode 1))
+
+  (use-package evil-collection
+    :after evil
+    :config
+    (evil-collection-init))
+#+END_SRC
+
+** Which Key
+#+BEGIN_SRC emacs-lisp
+  (which-key-mode 1)
+  (which-key-setup-side-window-bottom)
+#+END_SRC
+
+** General
+#+BEGIN_SRC emacs-lisp
+  (require 'general)
+
+  (general-create-definer my-leader-def
+    :prefix "SPC")
+
+  (my-leader-def
+    :keymaps 'normal
+    "TAB" 'mode-line-other-buffer
+    "." 'xref-find-definitions
+    "," 'xref-pop-marker-stack
+    "vt" 'vterm
+    "qq" 'evil-quit
+    
+    ;; Applications
+    "a" '(:ignore t :which-key "applications")
+    "au" 'undo-tree-visualize
+    "aU" 'straight-pull-all
+    "ac" 'cfw:open-org-calendar
+    
+    ;; Buffers
+    "b" '(:ignore t :which-key "buffers")
+    "bb" 'counsel-switch-buffer
+    "bd" 'kill-this-buffer
+    "bp" 'previous-buffer
+    "bn" 'next-buffer
+    "bN" 'evil-buffer-new
+    "be" 'erase-buffer
+    
+    ;; Bookmarks
+    "B" '(:ignore t :which-key "bookmarks")
+    "BB" 'bookmark-jump
+    "Bs" 'bookmark-set
+    
+    ;; Compiling
+    "c" 'compile
+    
+    ;; Errors
+    "e" '(:ignore t :which-key "errors")
+    
+    ;; Files
+    "f" '(:ignore t :which-key "file")
+    "ff" 'find-file
+    "fs" 'save-buffer
+    "fS" 'evil-write-all
+    "fR" 'rename-file
+    "fb" 'ranger-show-bookmarks
+    "fP" 'open-config-file
+    
+    ;; Focus
+    "F" '(:ignore t :which-key "focus")
+    
+    ;; LSP
+    "vca" 'lsp-execute-code-action
+    "vff" 'lsp-format-buffer
+    "vrn" 'lsp-rename
+    "vrr" 'lsp-ui-peek-find-references
+    "K" 'lsp-ui-doc-glance
+    "ll" 'lsp-ui-flycheck-list
+
+    ;; Projects
+    "p" '(:ignore t :which-key "project")
+
+    ;; Toggles
+    "t" '(:ignore t :which-key "toggles")
+    "tn" 'display-line-numbers-mode
+    "tL" 'visual-line-mode
+    "tu" 'lsp-ui-mode
+    "ti" 'highlight-indent-guides-mode
+
+    ;; Themes
+    "T" '(:ignore t :which-key "themes")
+
+    ;; Windows
+    "w" '(:ignore t :which-key "window")
+    "wm" 'delete-other-windows
+    "wf" 'delete-other-windows
+    "wj" 'evil-window-down
+    "wk" 'evil-window-up
+    "wl" 'evil-window-right
+    "wh" 'evil-window-left
+    "ws" 'split-and-follow-horizontally
+    "wv" 'split-and-follow-vertically
+    "wd" 'evil-window-delete
+    "wc" 'evil-window-delete
+    "wH" 'evil-window-move-far-left
+    "wL" 'evil-window-move-far-right
+    "wK" 'evil-window-move-very-top
+    "wJ" 'evil-window-move-very-bottom
+    "w=" 'balance-windows
+
+    ;; Help
+    "h" '(:ignore t :which-key "help")
+    "hk" 'describe-key
+    "hv" 'describe-variable
+    "hf" 'describe-function
+    "hK" 'general-describe-keybindings)
+
+  ;;(use-package general
+  ;;       :demand t
+  ;;       :config
+  ;;       (general-evil-setup t)
+  ;;       (define-key evil-motion-state-map " " nil)
+  ;;       (general-create-definer leader-def :prefix "SPC")
+  ;;       (leader-def
+  ;;         :states 'normal
+  ;;         ;; Misc
+  ;;         ))
+#+END_SRC
+
+
+* IDK WHERE TO PUT
+#+begin_src emacs-lisp
+(rainbow-mode)
+
+(use-package direnv
+  :config
+  (direnv-mode))
+
+
+(use-package projectile
+  :custom
+  (projectile-enable-caching t)
+  :config
+  (setq projectile-indexing-method 'alien)
+  (projectile-mode))
+
+(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+
+(use-package emacs
+  :custom
+  (context-menu-mode t)
+  (enable-recursive-minibuffers t)
+  (read-extended-command-predicate #'command-completion-default-include-p)
+  (minibuffer-prompt-properties
+   '(read-only t cursor-intangible t face minibuffer-prompt))
+  (tab-always-indent 'complete)
+  (text-mode-ispell-word-completion nil))
+
+(setq gc-cons-threshold (* 2 1000 1000))
+#+end_src
