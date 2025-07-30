@@ -81,7 +81,6 @@
             epkgs.evil
             epkgs.evil-collection
 
-            epkgs.lsp-mode
 	        epkgs.yasnippet
 	        epkgs.yasnippet-snippets
             epkgs.flycheck

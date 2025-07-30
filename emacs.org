@@ -4,7 +4,6 @@
 
 * Init
 #+BEGIN_SRC emacs-lisp
-  (setq gc-cons-theshold (* 50 1000 1000))
   (setq create-lockfiles nil)
 
   (setq backup-directory-alist
@@ -78,25 +77,34 @@
 * Appearance
 ** Tweaks
 #+BEGIN_SRC emacs-lisp 
-  (set-face-attribute 'default nil :font "FiraCode Nerd Font Mono" :height 85)
+(set-frame-parameter nil 'alpha-background 55)
+(set-face-attribute 'default nil :font "FiraCode Nerd Font Mono" :height 85)
 #+END_SRC
 ** Doom Themes
 #+BEGIN_SRC emacs-lisp
-(use-package doom-themes
-  :ensure t
-  :custom
-  (doom-themes-enable-bold t)   ; if nil, bold is universally disabled
-  (doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (doom-themes-treemacs-theme "doom-colors") ; use "doom-colors" for less minimal icon theme
-  :config
-  (doom-themes-visual-bell-config)
-  (doom-themes-treemacs-config)
-  (doom-themes-org-config))
+;; (use-package doom-themes
+;;   :ensure t
+;;   :custom
+;;   (doom-themes-enable-bold t)   ; if nil, bold is universally disabled
+;;   (doom-themes-enable-italic t) ; if nil, italics is universally disabled
+;;   ;; (doom-themes-treemacs-theme "doom-colors") ; use "doom-colors" for less minimal icon theme
+;;   :config
+;;   (doom-themes-visual-bell-config)
+;;   (doom-themes-treemacs-config)
+;;   (doom-themes-org-config))
 
 (use-package catppuccin-theme)
 (use-package ef-themes)
 
-(load-theme 'ef-winter)
+(use-package kaolin-themes
+  :custom
+  (setq kaolin-themes-modeline-border nil
+        kaolin-themes-git-gutter-solid t)
+  :config
+  (load-theme 'kaolin-dark t)
+  (kaolin-treemacs-theme))
+
+;; (load-theme 'ef-winter)
 
 ;;(setq catppuccin-flavor 'mocha)
 ;;(catppuccin-reload)
@@ -104,19 +112,19 @@
 
 ** Doom Modeline
 #+BEGIN_SRC emacs-lisp
-(use-package doom-modeline
-  :init (doom-modeline-mode 1)
-  :custom
-  (doom-modeline-major-mode-icon t)
-  (doom-modeline-major-mode-color-icon t)
-  (doom-modeline-icon (display-graphic-p))
-  (doom-modeline-modal-modern-icon t)
-  (doom-modeline-buffer-modification-icon nil)
-  (doom-modeline-flycheck-icon t)
-  (doom-modeline-checker-simple-format t)
-  (doom-modeline-height 25)
-  (doom-modeline-buffer-file-name-style 'file-name)
-  (doom-modeline-buffer-encoding nil))
+;; (use-package doom-modeline
+;;   :init (doom-modeline-mode 1)
+;;   :custom
+;;   (doom-modeline-major-mode-icon t)
+;;   (doom-modeline-major-mode-color-icon t)
+;;   (doom-modeline-icon (display-graphic-p))
+;;   (doom-modeline-modal-modern-icon t)
+;;   (doom-modeline-buffer-modification-icon nil)
+;;   (doom-modeline-flycheck-icon t)
+;;   (doom-modeline-checker-simple-format t)
+;;   (doom-modeline-height 25)
+;;   (doom-modeline-buffer-file-name-style 'file-name)
+;;   (doom-modeline-buffer-encoding nil))
 #+END_SRC
 ** Indent Bars
 #+BEGIN_SRC emacs-lisp
@@ -144,7 +152,7 @@
       org-hide-leading-stars t
       org-hide-emphasis-markers t
       org-pretty-entities t
-      org-ellipsis "..·")
+      org-ellipsis "...")
 #+END_SRC
 ** Org Indent
 #+BEGIN_SRC emacs-lisp
@@ -218,28 +226,25 @@
 
 
 * Packages
-** Autocomplete
+** Corfu
 #+BEGIN_SRC emacs-lisp
-(use-package company
-  :defer 0.5
-  :straight t
-  :delight
-  :init (global-company-mode)
+(use-package corfu
+  :after orderless
   :custom
-  (company-begin-commands '(self-insert-command))
-  (company-minimum-prefix-length 1)
-  (company-idle-delay 0.0)
-  (company-tooltip-limit 15)
-  (company-show-numbers t)
-  (company-tooltip-align-annotations t)
-  :config
-  (add-to-list 'company-backends
-               '(company-yasnippet
-                 company-files
-                 company-keywords
-                 company-capf
-                 company-dabbrev
-                 company-dabbrev-code)))
+  (corfu-auto t)
+  (corfu-auto-delay 0.2)
+  (corfu-on-exact-match nil)
+  (corfu-cycle t)
+  (corfu-preselect 'prompt)
+  (tab-always-indent 'complete)
+  (corfu-auto-prefix 1)
+  :hook ((prog-mode . corfu-mode)
+         (shell-mode . corfu-mode)
+         (eshell-mode . corfu-mode))
+  :init
+  (global-corfu-mode)
+  (corfu-history-mode)
+  (corfu-popupinfo-mode))
 #+END_SRC
 ** Dashboard
 #+BEGIN_SRC emacs-lisp
@@ -256,7 +261,7 @@
 #+BEGIN_SRC emacs-lisp
   (use-package orderless
     :custom
-    (completion-styles '(orderless))
+    (completion-styles '(orderless basic))
     (completion-category-defaults nil)
     (completion-category-overrides '((file (styles partial-completion)))))
 #+END_SRC
@@ -264,8 +269,12 @@
 #+BEGIN_SRC emacs-lisp
 (use-package vertico)
 (use-package vertico-posframe)
+(use-package all-the-icons-completion)
+
+(use-package consult)
 
 (vertico-posframe-mode 1)
+(all-the-icons-completion-mode)
 (vertico-mode)
 (savehist-mode)
 #+END_SRC
@@ -353,7 +362,6 @@
 (setq magit-section-cache-visibility nil)
 #+END_SRC
 
-
 ** Smudge
 #+BEGIN_SRC emacs-lisp
 (use-package smudge
@@ -369,7 +377,7 @@
 
 
 
-* Lsp
+* Dev
 ** Treesit
 #+BEGIN_SRC emacs-lisp
   (use-package treesit-auto
@@ -390,79 +398,105 @@
 ** Flycheck
 #+BEGIN_SRC emacs-lisp
 (use-package flycheck
-  :ensure t
+  :after (direnv-mode)
+  :config
+  (setq flycheck-display-errors-delay 0.25
+        flycheck-buffer-switch-check-intermediate-buffers t)
   :init (global-flycheck-mode)
   :bind (:map flycheck-mode-map
 	      ("M-n" . flycheck-next-error) ; optional but recommended error navigation
 	      ("M-p" . flycheck-previous-error)))
 
 (add-hook 'after-init-hook #'global-flycheck-mode)
-#+END_SRC
-** lsp-mode
-#+BEGIN_SRC emacs-lisp
-(use-package lsp-mode
-  :init
-  (setq lsp-keymap-prefix "C-c l")
-  :hook ((lsp-mode . lsp-enable-which-key-integration)
-         (yaml-ts-mode . lsp-deferred)
-         (nix-ts-mode . lsp-deferred)
-         (go-ts-mode . lsp-deferred)
-         (protobuf-mode . lsp-deferred)))
-  :commands lsp
+
+(use-package flycheck-eglot
+  :after (flycheck eglot)
   :config
-  (add-to-list 'lsp-language-id-configuration '(protobuf-mode . "protobuf"))
+  (global-flycheck-eglot-mode 1))
 
-  (lsp-register-client (make-lsp-client
-                        :new-connection (lsp-stdio-connection ("buf" "beta" "lsp" "--timeout" "0" "--log-format" "json"))
-                        :activation-fn (lsp-activate-on "protobuf")
-                        :server-id 'buf))
-
-  (setq lsp-enable-completion-at-point t
-        lsp-headerline-breadcrumb-enable nil
-        lsp-format-buffer-on-save t
-        lsp-auto-execute-action nil))
-
-(use-package lsp-ui
-  :commands lsp-ui-mode
-  :custom
-  (lsp-ui-sideline-enable t)
-  (lsp-ui-flycheck-enable t)
-  (lsp-ui-flycheck-live-reporting t)
-  (lsp-ui-sideline-toggle-symbols-info t)
-  (lsp-ui-sideline-show-hover t)
-  (lsp-ui-peek-enable t)
-  (lsp-idle-delay 0.500))
-
-(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
-
-(setq completion-in-region-function
-      (lambda (&rest args)
-	    (apply (if vertico-mode
-		           #'consult-completion-in-region
-		         #'completion--in-region)
-	           args)))
+(use-package flycheck-posframe
+  :ensure t
+  :after flycheck
+  :config (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode)
+  (setq flycheck-posframe-position 'point-bottom-right-corner))
 #+END_SRC
-
-** Modes
-*** Rust
+** lsp
+*** Modes
+**** Rust
 #+BEGIN_SRC emacs-lisp
-(use-package rust-mode
-    :init
-    (setq rust-mode-treesitter-derive t))
+(use-package rust-mode)
+(use-package rust-ts-mode
+  :after (eglot)
+  :hook ((rust-ts-mode . eglot-ensure)
+	     (rust-ts-mode . company-tng-mode)
+	     (rust-ts-mode . (lambda ()
+			               (eglot-inlay-hints-mode -1))))
+  :config
+  (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode))
+  (add-to-list 'eglot-server-programs '(rust-ts-mode . ("rust-analyzer"))))
 
 (use-package rustic
-    :config
-    (setq rustic-format-on-save nil)
-    (setq lsp-rust-analyzer-cargo-watch-command "clippy")
-    :custom
-    (push 'rustic-clippy flycheck-checkers)
-    (rustic-cargo-use-last-stored-arguments t)
-    :after (rust-mode))
+  :config
+  (setq rustic-format-on-save nil)
+  :custom
+  (rustic-lsp-client 'eglot)
+  (rustic-cargo-use-last-stored-arguments t)
+:after (rust-mode))
 
+(use-package cargo)
+(use-package flycheck-rust)
 
+(push 'rustic-clippy flycheck-checkers)
+
+(with-eval-after-load 'rust-mode
+  (add-hook 'rust-mode-hook 'cargo-minor-mode)
+  (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+
+(setq-default eglot-workspace-configuration
+              '(:rust-analyzer (:check (:command "clippy"))))
 #+END_SRC
 
-*** lsp-biome.el
+**** go
+#+BEGIN_SRC emacs-lisp
+(use-package go-mode
+  :ensure t
+  :bind (("C-c C-k" . go-run-this-file)
+         ("C-c C-c" . go-compile)
+         ("C-c C-d" . go-compile-debug))
+  :hook ((before-save . eglot-format-buffer)))
+#+END_SRC
+
+*** Eglot
+#+BEGIN_SRC emacs-lisp
+(use-package eglot
+  :commands eglot eglot-unsure
+  :hook ((go-ts-mode . eglot-ensure)
+         (protobuf-mode . eglot-ensure))
+  :custom
+  (eglot-sync-connect 1)
+  (eglot-autoshutdown t)
+  (eglot-auto-display-help-buffer nil)
+  :config
+  (cl-callf plist-put eglot-events-buffer-config :size 0)
+
+  (add-to-list 'eglot-server-programs
+               `(protobuf-mode
+                 . ,(eglot-alternatives '(("buf" "beta" "lsp" "--timeout" "0" "--log-format" "json"))))))
+
+(add-hook 'eglot--managed-mode-hook (lambda () (flymake-mode -1)))
+#+END_SRC
+
+*** Eldoc
+#+BEGIN_SRC emacs-lisp
+(use-package eldoc
+  :custom (eldoc-echo-area-use-multiline-p 'truncate-sym-name-if-fit))
+
+(use-package eldoc-box)
+
+(setq read-process-output-max (* 1024 1024))
+
+(add-hook 'eglot-managed-mode-hook #'eldoc-box-hover-mode t)
+#+END_SRC
 
 
 
@@ -490,113 +524,117 @@
 
 ** General
 #+BEGIN_SRC emacs-lisp
-  (require 'general)
+(require 'general)
 
-  (general-create-definer my-leader-def
-    :prefix "SPC")
+(general-create-definer my-leader-def
+  :prefix "SPC")
 
-  (my-leader-def
-    :keymaps 'normal
-    "TAB" 'mode-line-other-buffer
-    "." 'xref-find-definitions
-    "," 'xref-pop-marker-stack
-    "vt" 'vterm
-    "qq" 'evil-quit
-    
-    ;; Applications
-    "a" '(:ignore t :which-key "applications")
-    "au" 'undo-tree-visualize
-    "aU" 'straight-pull-all
-    "ac" 'cfw:open-org-calendar
-    
-    ;; Buffers
-    "b" '(:ignore t :which-key "buffers")
-    "bb" 'counsel-switch-buffer
-    "bd" 'kill-this-buffer
-    "bp" 'previous-buffer
-    "bn" 'next-buffer
-    "bN" 'evil-buffer-new
-    "be" 'erase-buffer
-    
-    ;; Bookmarks
-    "B" '(:ignore t :which-key "bookmarks")
-    "BB" 'bookmark-jump
-    "Bs" 'bookmark-set
-    
-    ;; Compiling
-    "c" 'compile
-    
-    ;; Errors
-    "e" '(:ignore t :which-key "errors")
-    
-    ;; Files
-    "f" '(:ignore t :which-key "file")
-    "ff" 'find-file
-    "fs" 'save-buffer
-    "fS" 'evil-write-all
-    "fR" 'rename-file
-    "fb" 'ranger-show-bookmarks
-    "fP" 'open-config-file
-    
-    ;; Focus
-    "F" '(:ignore t :which-key "focus")
-    
-    ;; LSP
-    "vca" 'lsp-execute-code-action
-    "vff" 'lsp-format-buffer
-    "vrn" 'lsp-rename
-    "vrr" 'lsp-ui-peek-find-references
-    "K" 'lsp-ui-doc-glance
-    "ll" 'lsp-ui-flycheck-list
+(my-leader-def
+  :keymaps 'normal
+  "TAB" 'mode-line-other-buffer
+  "." 'xref-find-definitions
+  "," 'xref-pop-marker-stack
+  "vt" 'vterm
+  "qq" 'evil-quit
+  "gg" 'magit-status
+  
+  ;; Applications
+  "a" '(:ignore t :which-key "applications")
+  "au" 'undo-tree-visualize
+  "aU" 'straight-pull-all
+  "ac" 'cfw:open-org-calendar
+  
+  ;; Buffers
+  "b" '(:ignore t :which-key "buffers")
+  "bb" 'consult-buffer
+  "bd" 'kill-this-buffer
+  "bp" 'previous-buffer
+  "bn" 'next-buffer
+  "bN" 'evil-buffer-new
+  "be" 'erase-buffer
+  
+  ;; Bookmarks
+  "B" '(:ignore t :which-key "bookmarks")
+  "BB" 'bookmark-jump
+  "Bs" 'bookmark-set
+  
+  ;; Compiling
+  "c" 'compile
+  
+  ;; Errors
+  "e" '(:ignore t :which-key "errors")
+  
+  ;; Files
+  "f" '(:ignore t :which-key "file")
+  "ff" 'find-file
+  "fs" 'save-buffer
+  "fS" 'evil-write-all
+  "fR" 'rename-file
+  "fb" 'ranger-show-bookmarks
+  "fP" 'open-config-file
+  
+  ;; Focus
+  "F" '(:ignore t :which-key "focus")
+  
+  ;; LSP
+  "vca" 'eglot-code-actions
+  "vff" 'eglot-format-buffer
+  "vrn" 'eglot-rename
+  "vrr" 'lsp-ui-peek-find-references
+  "gd"  'eglot-find-declaration
+  "gD"  'eglot-find-implementation
+  "K"   'lsp-ui-doc-glance
+  "ll"  'lsp-ui-flycheck-list
 
-    ;; Projects
-    "p" '(:ignore t :which-key "project")
+  ;; Projects
+  "pp" 'projectile-switch-project
+  "pf" 'projectile-find-file
 
-    ;; Toggles
-    "t" '(:ignore t :which-key "toggles")
-    "tn" 'display-line-numbers-mode
-    "tL" 'visual-line-mode
-    "tu" 'lsp-ui-mode
-    "ti" 'highlight-indent-guides-mode
+  ;; Toggles
+  "t" '(:ignore t :which-key "toggles")
+  "tn" 'display-line-numbers-mode
+  "tL" 'visual-line-mode
+  "tu" 'lsp-ui-mode
+  "ti" 'highlight-indent-guides-mode
 
-    ;; Themes
-    "T" '(:ignore t :which-key "themes")
+  ;; Themes
+  "tt" 'consult-theme
 
-    ;; Windows
-    "w" '(:ignore t :which-key "window")
-    "wm" 'delete-other-windows
-    "wf" 'delete-other-windows
-    "wj" 'evil-window-down
-    "wk" 'evil-window-up
-    "wl" 'evil-window-right
-    "wh" 'evil-window-left
-    "ws" 'split-and-follow-horizontally
-    "wv" 'split-and-follow-vertically
-    "wd" 'evil-window-delete
-    "wc" 'evil-window-delete
-    "wH" 'evil-window-move-far-left
-    "wL" 'evil-window-move-far-right
-    "wK" 'evil-window-move-very-top
-    "wJ" 'evil-window-move-very-bottom
-    "w=" 'balance-windows
+  ;; Windows
+  "w" '(:ignore t :which-key "window")
+  "wm" 'delete-other-windows
+  "wf" 'delete-other-windows
+  "wj" 'evil-window-down
+  "wk" 'evil-window-up
+  "wl" 'evil-window-right
+  "wh" 'evil-window-left
+  "ws" 'split-and-follow-horizontally
+  "wv" 'split-and-follow-vertically
+  "wd" 'evil-window-delete
+  "wc" 'evil-window-delete
+  "wH" 'evil-window-move-far-left
+  "wL" 'evil-window-move-far-right
+  "wK" 'evil-window-move-very-top
+  "wJ" 'evil-window-move-very-bottom
+  "w=" 'balance-windows
 
-    ;; Help
-    "h" '(:ignore t :which-key "help")
-    "hk" 'describe-key
-    "hv" 'describe-variable
-    "hf" 'describe-function
-    "hK" 'general-describe-keybindings)
+  ;; Help
+  "h" '(:ignore t :which-key "help")
+  "hk" 'describe-key
+  "hv" 'describe-variable
+  "hf" 'describe-function
+  "hK" 'general-describe-keybindings)
 
-  ;;(use-package general
-  ;;       :demand t
-  ;;       :config
-  ;;       (general-evil-setup t)
-  ;;       (define-key evil-motion-state-map " " nil)
-  ;;       (general-create-definer leader-def :prefix "SPC")
-  ;;       (leader-def
-  ;;         :states 'normal
-  ;;         ;; Misc
-  ;;         ))
+;;(use-package general
+;;       :demand t
+;;       :config
+;;       (general-evil-setup t)
+;;       (define-key evil-motion-state-map " " nil)
+;;       (general-create-definer leader-def :prefix "SPC")
+;;       (leader-def
+;;         :states 'normal
+;;         ;; Misc
+;;         ))
 #+END_SRC
 
 
@@ -626,7 +664,6 @@
   (minibuffer-prompt-properties
    '(read-only t cursor-intangible t face minibuffer-prompt))
   (tab-always-indent 'complete)
+  (read-extended-command-predicate #'command-completion-default-include-p)
   (text-mode-ispell-word-completion nil))
-
-(setq gc-cons-threshold (* 2 1000 1000))
 #+end_src
