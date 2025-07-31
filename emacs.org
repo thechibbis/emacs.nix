@@ -4,14 +4,22 @@
 
 * Init
 #+BEGIN_SRC emacs-lisp
-  (setq create-lockfiles nil)
+(setq create-lockfiles nil)
 
-  (setq backup-directory-alist
-	`(("." . ,(concat user-emacs-directory "backups"))))
+(setq backup-directory-alist
+      `(("." . ,(concat user-emacs-directory "backups"))))
+#+END_SRC
+
+** GCMH
+#+BEGIN_SRC emacs-lisp
+(use-package gcmh
+  :demand
+  :config (gcmh-mode 1))
 #+END_SRC
 
 
 * Better Default
+Copied from megumacs
 #+BEGIN_SRC emacs-lisp
 (when window-system
   (blink-cursor-mode 0) ; Disable the cursor blinking
@@ -75,90 +83,116 @@
 
 
 * Appearance
+
 ** Tweaks
-#+BEGIN_SRC emacs-lisp 
-(set-frame-parameter nil 'alpha-background 55)
-(set-face-attribute 'default nil :font "FiraCode Nerd Font Mono" :height 85)
-#+END_SRC
-** Doom Themes
 #+BEGIN_SRC emacs-lisp
-;; (use-package doom-themes
-;;   :ensure t
-;;   :custom
-;;   (doom-themes-enable-bold t)   ; if nil, bold is universally disabled
-;;   (doom-themes-enable-italic t) ; if nil, italics is universally disabled
-;;   ;; (doom-themes-treemacs-theme "doom-colors") ; use "doom-colors" for less minimal icon theme
-;;   :config
-;;   (doom-themes-visual-bell-config)
-;;   (doom-themes-treemacs-config)
-;;   (doom-themes-org-config))
+;; (set-frame-parameter nil 'alpha-background 55)
 
-(use-package catppuccin-theme)
-(use-package ef-themes)
+(set-face-attribute 'default nil :font "Iosevka Nerd Font" :height 120)
+(custom-theme-set-faces
+ 'user
+ '(variable-pitch ((t (:family "Fira Code" :height 200))))
+ '(fixed-pitch ((t ( :family "Iosevka Nerd Font" :height 120)))))
 
-(use-package kaolin-themes
-  :custom
-  (setq kaolin-themes-modeline-border nil
-        kaolin-themes-git-gutter-solid t)
-  :config
-  (load-theme 'kaolin-dark t)
-  (kaolin-treemacs-theme))
-
-;; (load-theme 'ef-winter)
-
-;;(setq catppuccin-flavor 'mocha)
-;;(catppuccin-reload)
+(custom-theme-set-faces
+ 'user
+ '(org-block ((t (:inherit fixed-pitch))))
+ '(org-code ((t (:inherit (fixed-pitch)))))
+ '(org-document-info ((t (:foreground "dark orange"))))
+ '(org-document-info-keyword ((t (:inherit (fixed-pitch)))))
+ '(org-indent ((t (:inherit (org-hide fixed-pitch)))))
+ '(org-link ((t (:foreground "royal blue" :underline t))))
+ '(org-meta-line ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+ '(org-property-value ((t (:inherit fixed-pitch))) t)
+ '(org-special-keyword ((t (:inherit (font-lock-comment-face fixed-pitch)))))
+ '(org-table ((t (:inherit fixed-pitch :foreground "#83a598"))))
+ '(org-tag ((t (:inherit (shadow fixed-pitch) :weight bold :height 0.8))))
+ '(org-verbatim ((t (:inherit (shadow fixed-pitch)))))
+ '(mode-line ((t (:inherit fixed-pitch))))
+ '(line-number ((t (:inherit fixed-pitch)))))
 #+END_SRC
 
-** Doom Modeline
+
+** Modus Themes
 #+BEGIN_SRC emacs-lisp
-;; (use-package doom-modeline
-;;   :init (doom-modeline-mode 1)
-;;   :custom
-;;   (doom-modeline-major-mode-icon t)
-;;   (doom-modeline-major-mode-color-icon t)
-;;   (doom-modeline-icon (display-graphic-p))
-;;   (doom-modeline-modal-modern-icon t)
-;;   (doom-modeline-buffer-modification-icon nil)
-;;   (doom-modeline-flycheck-icon t)
-;;   (doom-modeline-checker-simple-format t)
-;;   (doom-modeline-height 25)
-;;   (doom-modeline-buffer-file-name-style 'file-name)
-;;   (doom-modeline-buffer-encoding nil))
+(require-theme 'modus-themes)
+
+(setq modus-themes-common-palette-overrides
+      '((border-mode-line-active bg-mode-line-active)
+        (border-mode-line-inactive bg-mode-line-inactive)
+      (fg-line-number-inactive "gray50")
+        (fg-line-number-active fg-main)
+        (bg-line-number-inactive unspecified)
+        (bg-line-number-active unspecified)))
+(load-theme 'modus-vivendi)
 #+END_SRC
+
+
 ** Indent Bars
 #+BEGIN_SRC emacs-lisp
-  (use-package indent-bars
-      :hook ((python-mode yaml-mode nix-mode rust-mode typescript-mode javascript-mode) . indent-bars-mode))
+(use-package indent-bars
+  :hook ((python-mode yaml-mode nix-mode rust-mode typescript-mode javascript-mode) . indent-bars-mode))
 #+END_SRC
+
 
 ** All The Icons
 #+BEGIN_SRC emacs-lisp
-  (use-package all-the-icons
-      :if (display-graphic-p))
+(use-package all-the-icons
+  :if (display-graphic-p))
 #+END_SRC
 
 
-* Orgggggggggggggggggggg
+* Org
+
 ** Org
 #+BEGIN_SRC emacs-lisp
 (add-hook 'org-mode-hook 'visual-line-mode)
 
-(setq org-src-fontify-natively t
-      org-src-tab-acts-natively t
-      org-edit-src-content-indentation 0)
+(add-hook 'org-mode-hook 'variable-pitch-mode) 
 
-(setq org-adapt-indentation t
-      org-hide-leading-stars t
-      org-hide-emphasis-markers t
-      org-pretty-entities t
-      org-ellipsis "...")
+  (use-package org
+    :defer t
+    :config
+    (setq org-adapt-indentation t
+          org-hide-leading-stars nil
+          org-hide-emphasis-markers t
+          org-pretty-entities t
+          org-src-fontify-natively t
+          org-startup-folded t
+          org-adapt-indentation t
+          org-edit-src-content-indentation 0
+          org-src-fontify-natively t
+          org-src-tab-acts-natively t
+          org-startup-indented t
+          org-indent-indentation-per-level 2
+          org-edit-src-content-indentation 0
+          org-auto-align-tags nil
+          org-tags-column 0
+          org-fold-catch-invisible-edits 'show-and-error
+          org-special-ctrl-a/e t
+          org-insert-heading-respect-content t
+
+          ;; Agenda styling
+          org-agenda-tags-column 0
+          org-agenda-time-grid
+          '((daily today require-timed)
+            (800 1000 1200 1400 1600 1800 2000)
+            " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+          org-agenda-current-time-string
+          "⭠ now ─────────────────────────────────────────────────")
+
+    (custom-set-faces
+     '(org-document-title ((t (:inherit outline-1 :height 1.75))))
+     '(org-level-1 ((t (:inherit outline-1 :height 1.5))))
+     '(org-level-2 ((t (:inherit outline-2 :height 1.25))))
+     '(org-level-3 ((t (:inherit outline-3 :height 1.125))))
+     '(org-level-4 ((t (:inherit outline-4 :height 1.0625))))
+     '(org-level-5 ((t (:inherit outline-5 :height 1.03125))))))
+
+  (global-prettify-symbols-mode t)
 #+END_SRC
-** Org Indent
-#+BEGIN_SRC emacs-lisp
-  (require 'org-indent)
-  (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
-#+END_SRC
+
+
 ** Org Roam
 #+BEGIN_SRC emacs-lisp
 (use-package org-roam
@@ -178,93 +212,78 @@
   ;; If using org-roam-protocol
   (require 'org-roam-protocol))
 #+END_SRC
+
+
+** Org Indent
+#+BEGIN_SRC emacs-lisp
+(require 'org-indent)
+
+(set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
+#+END_SRC
+
+
 ** Org Modern
 #+BEGIN_SRC emacs-lisp
-  (dolist (face '(window-divider
-		window-divider-first-pixel
-		window-divider-last-pixel))
-    (face-spec-reset-face face)
-    (set-face-foreground face (face-attribute 'default :background)))
-  (set-face-background 'fringe (face-attribute 'default :background))
+(dolist (face '(window-divider
+                window-divider-first-pixel
+                window-divider-last-pixel))
+  (face-spec-reset-face face)
+  (set-face-foreground face (face-attribute 'default :background)))
+(set-face-background 'fringe (face-attribute 'default :background))
 
-    (setq
-     org-auto-align-tags t
-     org-tags-column 0
-     org-fold-catch-invisible-edits 'show-and-error
-     org-special-ctrl-a/e t
-     org-insert-heading-respect-content t
+(use-package org-modern
+  :after org
+  :config (global-org-modern-mode 1)
+  :custom
+  (org-modern-hide-stars nil)		; adds extra indentation
+  (org-modern-table nil)
+  (org-modern-list
+   '(;; (?- . "-")
+     (?* . "•")
+     (?+ . "‣")))
+  :hook
+  (org-mode . org-modern-mode)
+  (org-agenda-finalize . org-modern-agenda))
 
-     ;; Agenda styling
-     org-agenda-tags-column 0
-     org-agenda-time-grid
-     '((daily today require-timed)
-       (800 1000 1200 1400 1600 1800 2000)
-       " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
-     org-agenda-current-time-string
-     "⭠ now ─────────────────────────────────────────────────")
-
-
-  (with-eval-after-load 'org (global-org-modern-mode))
-#+END_SRC
-** Org Superstar
-#+BEGIN_SRC emacs-lisp
-  (use-package org-superstar
-    :config
-    (setq org-superstar-leading-bullet " ")
-    (setq org-superstar-special-todo-items t) ;; Makes TODO header bullets into boxes
-    (setq org-superstar-todo-bullet-alist '(("TODO" . 9744)
-                                            ("DONE" . 9744)
-                                            ("READ" . 9744)
-                                            ("IDEA" . 9744)
-                                            ("WAITING" . 9744)
-                                            ("CANCELLED" . 9744)
-                                            ("PROJECT" . 9744)
-                                            ("POSTPONED" . 9744)))
-    )
+(use-package org-modern-indent
+  :config
+  (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
 #+END_SRC
 
+
+** Org Bullet
+#+begin_src emacs-lisp
+(use-package org-bullets
+  :config
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+#+end_src
 
 
 * Packages
-** Corfu
-#+BEGIN_SRC emacs-lisp
-(use-package corfu
-  :after orderless
-  :custom
-  (corfu-auto t)
-  (corfu-auto-delay 0.2)
-  (corfu-on-exact-match nil)
-  (corfu-cycle t)
-  (corfu-preselect 'prompt)
-  (tab-always-indent 'complete)
-  (corfu-auto-prefix 1)
-  :hook ((prog-mode . corfu-mode)
-         (shell-mode . corfu-mode)
-         (eshell-mode . corfu-mode))
-  :init
-  (global-corfu-mode)
-  (corfu-history-mode)
-  (corfu-popupinfo-mode))
-#+END_SRC
+
 ** Dashboard
 #+BEGIN_SRC emacs-lisp
-  (use-package dashboard
-    :config
-    (setq dashboard-items '((recents   . 5)
-			    (bookmarks . 5)
-			    (projects  . 5)
-			    (agenda    . 5)
-			    (registers . 5)))
-    (dashboard-setup-startup-hook))
+(use-package dashboard
+  :config
+  (setq dashboard-items '((recents   . 5)
+                                (bookmarks . 5)
+                                (projects  . 5)
+                                (agenda    . 5)
+                                (registers . 5)))
+  (dashboard-setup-startup-hook))
 #+END_SRC
+
+
 ** Orderless
 #+BEGIN_SRC emacs-lisp
-  (use-package orderless
-    :custom
-    (completion-styles '(orderless basic))
-    (completion-category-defaults nil)
-    (completion-category-overrides '((file (styles partial-completion)))))
+(use-package orderless
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-defaults nil)
+  (completion-category-overrides '((file (styles partial-completion)))))
 #+END_SRC
+
+
 ** Vertico
 #+BEGIN_SRC emacs-lisp
 (use-package vertico)
@@ -278,6 +297,7 @@
 (vertico-mode)
 (savehist-mode)
 #+END_SRC
+
 
 ** Treemacs
 #+BEGIN_SRC emacs-lisp
@@ -350,6 +370,7 @@
   (treemacs-load-theme "all-the-icons"))
 #+END_SRC
 
+
 ** Magit
    #+BEGIN_SRC emacs-lisp
 (use-package magit
@@ -361,6 +382,7 @@
 ;; Getting an alist-void error when running magit commands that refresh the buffer. Narrowed down to this variable so turning off for now
 (setq magit-section-cache-visibility nil)
 #+END_SRC
+
 
 ** Smudge
 #+BEGIN_SRC emacs-lisp
@@ -375,26 +397,86 @@
 #+END_SRC
 
 
+** Ultra-scrool
+#+BEGIN_SRC emacs-lisp
+(use-package ultra-scroll
+  :init
+  (setq scroll-conservatively 3 ; or whatever value you prefer, since v0.4
+        scroll-margin 0)        ; important: scroll-margin>0 not yet supported
+  :config
+  (ultra-scroll-mode 1))
+
+#+END_SRC
 
 
 * Dev
-** Treesit
+
+** Corfu
 #+BEGIN_SRC emacs-lisp
-  (use-package treesit-auto
-      :custom
-      (treesit-auto-install 'prompt)
-      :config
-      (treesit-auto-add-to-auto-mode-alist 'all)
-      (global-treesit-auto-mode))
+(use-package corfu
+  :after orderless
+  :custom
+  (corfu-auto t)
+  (corfu-auto-delay 0.2)
+  (corfu-on-exact-match nil)
+  (corfu-cycle t)
+  (corfu-preselect 'prompt)
+  (tab-always-indent 'complete)
+  (corfu-auto-prefix 1)
+  :hook ((prog-mode . corfu-mode)
+         (shell-mode . corfu-mode)
+         (eshell-mode . corfu-mode))
+  :init
+  (global-corfu-mode)
+  (corfu-history-mode)
+  (corfu-popupinfo-mode))
+
+(use-package nerd-icons-corfu)
+(add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
 #+END_SRC
+
+
+** Cape
+#+BEGIN_SRC emacs-lisp
+(use-package cape
+  :bind ("C-c p" . cape-prefix-map)
+  :init
+  (add-hook 'complete-at-point-functions #'company-yasnippet)
+  (add-hook 'completion-at-point-functions #'cape-dabbrev)
+  (add-hook 'completion-at-point-functions #'cape-file)
+  (add-hook 'completion-at-point-functions #'cape-elisp-block)
+  (add-hook 'completion-at-point-functions #'cape-history))
+#+END_SRC
+
 
 ** Yasnippets
-   #+BEGIN_SRC emacs-lisp
-   (use-package yasnippet
-     :config (yas-global-mode 1))
+#+BEGIN_SRC emacs-lisp
+(use-package yasnippet
+  :config (yas-global-mode 1))
 
-   (use-package yasnippet-snippets)
+(use-package yasnippet-snippets)
+
+(use-package yasnippet-capf
+  :after cape
+  :config
+  (setq yasnippet-capf-lookup-by 'name))
+
+(add-to-list 'completion-at-point-functions #'yasnippet-capf)
 #+END_SRC
+
+
+** Treesit
+#+BEGIN_SRC emacs-lisp
+(use-package treesit-auto
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
+#+END_SRC
+
+
+
 ** Flycheck
 #+BEGIN_SRC emacs-lisp
 (use-package flycheck
@@ -408,38 +490,30 @@
 	      ("M-p" . flycheck-previous-error)))
 
 (add-hook 'after-init-hook #'global-flycheck-mode)
-
-(use-package flycheck-eglot
-  :after (flycheck eglot)
-  :config
-  (global-flycheck-eglot-mode 1))
-
-(use-package flycheck-posframe
-  :ensure t
-  :after flycheck
-  :config (add-hook 'flycheck-mode-hook #'flycheck-posframe-mode)
-  (setq flycheck-posframe-position 'point-bottom-right-corner))
 #+END_SRC
+
+
 ** lsp
+
 *** Modes
+
 **** Rust
 #+BEGIN_SRC emacs-lisp
 (use-package rust-mode)
 (use-package rust-ts-mode
-  :after (eglot)
-  :hook ((rust-ts-mode . eglot-ensure)
+  :ensure nil
+  :after (lsp-mode)
+  :hook ((rust-ts-mode . lsp-deferred)
 	     (rust-ts-mode . company-tng-mode)
 	     (rust-ts-mode . (lambda ()
 			               (eglot-inlay-hints-mode -1))))
   :config
-  (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode))
-  (add-to-list 'eglot-server-programs '(rust-ts-mode . ("rust-analyzer"))))
+  (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode)))
 
 (use-package rustic
   :config
   (setq rustic-format-on-save nil)
   :custom
-  (rustic-lsp-client 'eglot)
   (rustic-cargo-use-last-stored-arguments t)
 :after (rust-mode))
 
@@ -451,76 +525,126 @@
 (with-eval-after-load 'rust-mode
   (add-hook 'rust-mode-hook 'cargo-minor-mode)
   (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
-
-(setq-default eglot-workspace-configuration
-              '(:rust-analyzer (:check (:command "clippy"))))
 #+END_SRC
+
+
 
 **** go
 #+BEGIN_SRC emacs-lisp
 (use-package go-mode
-  :ensure t
-  :bind (("C-c C-k" . go-run-this-file)
-         ("C-c C-c" . go-compile)
-         ("C-c C-d" . go-compile-debug))
-  :hook ((before-save . eglot-format-buffer)))
-#+END_SRC
-
-*** Eglot
-#+BEGIN_SRC emacs-lisp
-(use-package eglot
-  :commands eglot eglot-unsure
-  :hook ((go-ts-mode . eglot-ensure)
-         (protobuf-mode . eglot-ensure))
+  :mode "\\.go\\'"
+  :preface
+   (defun vd/go-lsp-start()
+    (define-key go-ts-mode-map
+            ["RET"] 'newline-and-indent)
+    (define-key go-ts-mode-map
+            ["M-RET"] 'newline)
+    (add-hook 'before-save-hook #'lsp-format-buffer t t)
+    (add-hook 'before-save-hook #'lsp-organize-imports t t)
+    (lsp-deferred))
+  :hook
+  (go-ts-mode . vd/go-lsp-start)
   :custom
-  (eglot-sync-connect 1)
-  (eglot-autoshutdown t)
-  (eglot-auto-display-help-buffer nil)
+  (go-ts-mode-indent-offset 4)
   :config
-  (cl-callf plist-put eglot-events-buffer-config :size 0)
+  (setq lsp-go-analyses '((nilness . t)
+                          (shadow . t)
+                          (unusedwrite . t))
+        lsp-go-codelenses '((test . t)
+                          (tidy . t)
+                          (upgrade_dependency . t)
+                          (vendor . t)
+                          (run_govulncheck . t))))
 
-  (add-to-list 'eglot-server-programs
-               `(protobuf-mode
-                 . ,(eglot-alternatives '(("buf" "beta" "lsp" "--timeout" "0" "--log-format" "json"))))))
-
-(add-hook 'eglot--managed-mode-hook (lambda () (flymake-mode -1)))
+(use-package go-tag)
+(use-package godoctor)
+(use-package go-fill-struct)
 #+END_SRC
 
-*** Eldoc
+
+*** Lsp Mode
 #+BEGIN_SRC emacs-lisp
-(use-package eldoc
-  :custom (eldoc-echo-area-use-multiline-p 'truncate-sym-name-if-fit))
+(use-package lsp-mode
+  :init
+  (setq lsp-keymap-prefix "C-c l"
+        lsp-enable-folding nil
+        lsp-enable-text-document-color t
+        lsp-enable-on-type-formatting nil
+        lsp-headerline-breadcrumb-enable nil
+        lsp-completion-provider :none
+        lsp-semantic-tokens-enable t)
+  :hook ((lsp-mode . lsp-enable-which-key-integration)
+         )
+  :commands (lsp lsp-deferred))
 
-(use-package eldoc-box)
+;; optionally
+(use-package lsp-ui :commands lsp-ui-mode)
 
-(setq read-process-output-max (* 1024 1024))
-
-(add-hook 'eglot-managed-mode-hook #'eldoc-box-hover-mode t)
+(with-eval-after-load 'lsp-mode
+  (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]\\.direnv\\'")
+  (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]\\.devenv\\'"))
 #+END_SRC
 
+
+*** Lsp Booster
+#+BEGIN_SRC emacs-lisp
+(defun lsp-booster--advice-json-parse (old-fn &rest args)
+  "Try to parse bytecode instead of json."
+  (or
+   (when (equal (following-char) ?#)
+     (let ((bytecode (read (current-buffer))))
+       (when (byte-code-function-p bytecode)
+         (funcall bytecode))))
+   (apply old-fn args)))
+(advice-add (if (progn (require 'json)
+                       (fboundp 'json-parse-buffer))
+                'json-parse-buffer
+              'json-read)
+            :around
+            #'lsp-booster--advice-json-parse)
+
+(defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
+  "Prepend emacs-lsp-booster command to lsp CMD."
+  (let ((orig-result (funcall old-fn cmd test?)))
+    (if (and (not test?)                             ;; for check lsp-server-present?
+             (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
+             lsp-use-plists
+             (not (functionp 'json-rpc-connection))  ;; native json-rpc
+             (executable-find "emacs-lsp-booster"))
+        (progn
+          (when-let ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
+            (setcar orig-result command-from-exec-path))
+          (message "Using emacs-lsp-booster for %s!" orig-result)
+          (cons "emacs-lsp-booster" orig-result))
+      orig-result)))
+(advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
+#+END_SRC
 
 
 * Keymaps
+
 ** Vim > Emacs
 #+BEGIN_SRC emacs-lisp
-  (use-package evil
-    :init
-    (setq evil-want-integration t)
-    (setq evil-want-keybinding nil)
-    :config
-    (evil-mode 1))
+(use-package evil
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  :config
+  (evil-mode 1))
 
-  (use-package evil-collection
-    :after evil
-    :config
-    (evil-collection-init))
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init))
 #+END_SRC
+
 
 ** Which Key
 #+BEGIN_SRC emacs-lisp
   (which-key-mode 1)
   (which-key-setup-side-window-bottom)
 #+END_SRC
+
 
 ** General
 #+BEGIN_SRC emacs-lisp
@@ -537,7 +661,7 @@
   "vt" 'vterm
   "qq" 'evil-quit
   "gg" 'magit-status
-  
+
   ;; Applications
   "a" '(:ignore t :which-key "applications")
   "au" 'undo-tree-visualize
@@ -577,12 +701,12 @@
   "F" '(:ignore t :which-key "focus")
   
   ;; LSP
-  "vca" 'eglot-code-actions
-  "vff" 'eglot-format-buffer
-  "vrn" 'eglot-rename
+  "vca" 'lsp-execute-code-action
+  "vff" 'lsp-format-buffer
+  "vrn" 'lsp-rename
   "vrr" 'lsp-ui-peek-find-references
-  "gd"  'eglot-find-declaration
-  "gD"  'eglot-find-implementation
+  "gd"  'lsp-find-declaration
+  "gD"  'lsp-find-implementation
   "K"   'lsp-ui-doc-glance
   "ll"  'lsp-ui-flycheck-list
 
@@ -645,6 +769,8 @@
 (use-package direnv
   :config
   (direnv-mode))
+
+(use-package zen-mode)
 
 
 (use-package projectile

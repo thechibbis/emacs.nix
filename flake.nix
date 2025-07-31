@@ -25,21 +25,21 @@
           alwaysTangle = true;
 
           override = epkgs: epkgs // {
-            mirwood-theme = pkgs.emacsPackages.callPackage ./custom/emacs-mirwood-theme.nix {
+            org-modern-indent = pkgs.emacsPackages.callPackage ./custom/org-modern-indent.nix {
               inherit (pkgs) fetchFromGitHub;
-              inherit (epkgs) melpaBuild autothemer;
+              inherit (epkgs) melpaBuild org-modern;
             };
 
-            rose-pine-emacs = pkgs.emacsPackages.callPackage ./custom/rose-pine-emacs.nix {
+            ultra-scroll = pkgs.emacsPackages.callPackage ./custom/ultra-scroll.nix {
               inherit (pkgs) fetchFromGitHub;
-              inherit (epkgs) melpaBuild autothemer;
+              inherit (epkgs) melpaBuild;
             };
           };
 
           extraEmacsPackages = epkgs: [
             # custom packages
-            epkgs.mirwood-theme
-            epkgs.rose-pine-emacs
+            epkgs.org-modern-indent
+            epkgs.ultra-scroll
 
             epkgs.vertico
             epkgs.emacs
@@ -89,6 +89,8 @@
             epkgs.rustic
 	        epkgs.nix-ts-mode
             epkgs.protobuf-mode
+
+            pkgs.emacs-lsp-booster
 
             # lsps
             pkgs.rust-analyzer
