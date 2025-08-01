@@ -88,11 +88,11 @@ Copied from megumacs
 #+BEGIN_SRC emacs-lisp
 ;; (set-frame-parameter nil 'alpha-background 55)
 
-(set-face-attribute 'default nil :font "Iosevka Nerd Font" :height 120)
+(set-face-attribute 'default nil :font "Iosevka Nerd Font" :height 130)
 (custom-theme-set-faces
  'user
  '(variable-pitch ((t (:family "Fira Code" :height 200))))
- '(fixed-pitch ((t ( :family "Iosevka Nerd Font" :height 120)))))
+ '(fixed-pitch ((t ( :family "Iosevka Nerd Font" :height 130)))))
 
 (custom-theme-set-faces
  'user
@@ -566,15 +566,19 @@ Copied from megumacs
 #+BEGIN_SRC emacs-lisp
 (use-package lsp-mode
   :init
-  (setq lsp-keymap-prefix "C-c l"
+  (setq read-process-output-max (* 1024 1024))
+
+  (setq lsp-use-plists t
+        lsp-keymap-prefix "C-c l"
         lsp-enable-folding nil
         lsp-enable-text-document-color t
         lsp-enable-on-type-formatting nil
         lsp-headerline-breadcrumb-enable nil
-        lsp-completion-provider :none
-        lsp-semantic-tokens-enable t)
-  :hook ((lsp-mode . lsp-enable-which-key-integration)
-         )
+        lsp-completion-provider :none)
+
+  (setq lsp-log-io nil)
+
+  :hook ((lsp-mode . lsp-enable-which-key-integration))
   :commands (lsp lsp-deferred))
 
 ;; optionally
