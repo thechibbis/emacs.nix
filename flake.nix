@@ -15,9 +15,6 @@
           overlays = [ emacs-overlay.overlay ];
         };
 
-        packages =
-          epkgs: with epkgs; [];
-
         emacs-custom = (pkgs.emacsWithPackagesFromUsePackage {
           config = ./emacs.org;
           defaultInitFile = true;
@@ -38,6 +35,11 @@
               inherit (epkgs) melpaBuild;
             };
 
+            zen-mode = pkgs.emacsPackages.callPackage ./custom/zen-mode.nix {
+              inherit (pkgs) fetchFromGitHub;
+              inherit (epkgs) melpaBuild;
+            };
+
             lsp-mode = epkgs.lsp-mode.overrideAttrs (old: {
               buildPhase = ''
                 export LSP_USE_PLISTS=true
@@ -50,64 +52,15 @@
             epkgs.org-modern-indent
             epkgs.ultra-scroll
             epkgs.lsp-mode
+            epkgs.zen-mode
 
-            epkgs.vertico
-            epkgs.emacs
-            epkgs.orderless
-            epkgs.company
-            epkgs.vterm
-            epkgs.rainbow-mode
-            epkgs.indent-bars
-            epkgs.direnv
-            epkgs.projectile
-            epkgs.dashboard
-            epkgs.general
-            epkgs.autothemer
-            epkgs.smudge
-            epkgs.ef-themes
-
-            epkgs.org-modern
-            epkgs.org-superstar
-            epkgs.org-roam
-            epkgs.ox-pandoc
-
-            epkgs.treesit-auto
             epkgs.treesit-grammars.with-all-grammars
 
-            epkgs.catppuccin-theme
-            epkgs.doom-themes
-            epkgs.doom-modeline
-
-            epkgs.treemacs
-            epkgs.treemacs-evil
-            epkgs.treemacs-projectile
-            epkgs.treemacs-icons-dired
-            epkgs.treemacs-magit
-            epkgs.treemacs-persp
-            epkgs.treemacs-tab-bar
-            epkgs.treemacs-all-the-icons
-            epkgs.all-the-icons
-
-            epkgs.evil
-            epkgs.evil-collection
-
-	        epkgs.yasnippet
-	        epkgs.yasnippet-snippets
-            epkgs.flycheck
-
-            epkgs.rust-mode
-            epkgs.rustic
-	        epkgs.nix-ts-mode
-            epkgs.protobuf-mode
-
             pkgs.emacs-lsp-booster
-
-            # lsps
             pkgs.rust-analyzer
             pkgs.yaml-language-server
             pkgs.nixd
             pkgs.nixfmt
-            pkgs.biome
             pkgs.gopls
             pkgs.buf
 

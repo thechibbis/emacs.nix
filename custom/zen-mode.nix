@@ -4,13 +4,13 @@
 }:
 
 melpaBuild {
-  pname = "ultra-scroll";
+  pname = "zen-mode";
   version = "0-unstable-2025-07-28";
 
   src = fetchFromGitHub {
-    owner = "jdtsmith";
-    repo = "ultra-scroll";
+    owner = "aki237";
+    repo = "zen-mode";
     rev = "master";
-    hash = "sha256-UzFH+LXZ1ui9Wh9mlRYcZcpLBx0nSzNTtKGB8JI0r9Q=";
+    hash = "sha256-16Pp/PPw67l6a0PMaYGRvQRe2DJbtiO6TFeFtHiAax8=";
   };
 }
