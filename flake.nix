@@ -15,6 +15,9 @@
           overlays = [ emacs-overlay.overlay ];
         };
 
+        packages =
+          epkgs: with epkgs; [];
+
         emacs-custom = (pkgs.emacsWithPackagesFromUsePackage {
           config = ./emacs.org;
           defaultInitFile = true;
@@ -34,12 +37,19 @@
               inherit (pkgs) fetchFromGitHub;
               inherit (epkgs) melpaBuild;
             };
+
+            lsp-mode = epkgs.lsp-mode.overrideAttrs (old: {
+              buildPhase = ''
+                export LSP_USE_PLISTS=true
+              '' + (old.buildPhase or "");
+            });
           };
 
           extraEmacsPackages = epkgs: [
             # custom packages
             epkgs.org-modern-indent
             epkgs.ultra-scroll
+            epkgs.lsp-mode
 
             epkgs.vertico
             epkgs.emacs
