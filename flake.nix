@@ -40,6 +40,11 @@
               inherit (epkgs) melpaBuild;
             };
 
+            lsp-biome = pkgs.emacsPackages.callPackage ./custom/lsp-biome.nix {
+              inherit (pkgs) fetchFromGitHub;
+              inherit (epkgs) melpaBuild lsp-mode;
+            };
+
             lsp-mode = epkgs.lsp-mode.overrideAttrs (old: {
               buildPhase = ''
                 export LSP_USE_PLISTS=true
@@ -51,10 +56,16 @@
             # custom packages
             epkgs.org-modern-indent
             epkgs.ultra-scroll
-            epkgs.lsp-mode
+            # epkgs.lsp-mode
+            epkgs.lsp-bridge
             epkgs.zen-mode
+            epkgs.lsp-biome
 
             epkgs.treesit-grammars.with-all-grammars
+            epkgs.vterm
+            epkgs.jinx
+
+            pkgs.aspell
 
             pkgs.emacs-lsp-booster
             pkgs.rust-analyzer
@@ -63,6 +74,9 @@
             pkgs.nixfmt
             pkgs.gopls
             pkgs.buf
+            pkgs.typescript-language-server
+            pkgs.biome
+            pkgs.emmet-ls
 
             # export pdf
             pkgs.pandoc

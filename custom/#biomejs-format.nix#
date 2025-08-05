@@ -1,0 +1,16 @@
+{
+  melpaBuild,
+  fetchFromGitHub,
+}:
+
+melpaBuild {
+  pname = "biomejs-format";
+  version = "0-unstable-2025-07-28";
+
+  src = fetchFromGitHub {
+    owner = "yadex205";
+    repo = "emacs-biomejs-format";
+    rev = "master";
+    hash = "sha256-aEXq6wI01N2aA9Q4oJttqFezZ0pq3H5ZhAV9f3TFZBM=";
+  };
+}

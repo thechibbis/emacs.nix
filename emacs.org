@@ -4,7 +4,7 @@
 
 * Init
 
-** GCMH
+** [[https://github.com/emacsmirror/gcmh][GCMH]]
 #+BEGIN_SRC emacs-lisp
 (use-package gcmh
   :demand
@@ -80,7 +80,7 @@ Copied from megumacs
 
 ** Tweaks
 #+BEGIN_SRC emacs-lisp
-;; (set-frame-parameter nil 'alpha-background 55)
+(set-frame-parameter nil 'alpha-background 80)
 
 (set-face-attribute 'default nil :font "Iosevka Nerd Font" :height 130)
 (custom-theme-set-faces
@@ -118,7 +118,17 @@ Copied from megumacs
         (fg-line-number-active fg-main)
         (bg-line-number-inactive unspecified)
         (bg-line-number-active unspecified)))
-(load-theme 'modus-vivendi)
+(load-theme 'modus-vivendi-tinted)
+#+END_SRC
+
+
+** [[https://github.com/seagle0128/doom-modeline][Doom Modeline]]
+#+BEGIN_SRC emacs-lisp
+(use-package doom-modeline
+  :config
+  (setq doom-modeline-height 30
+        doom-modeline-buffer-file-name-style 'file-name)
+  :hook (after-init . doom-modeline-mode))
 #+END_SRC
 
 
@@ -258,11 +268,15 @@ Copied from megumacs
 #+BEGIN_SRC emacs-lisp
 (use-package dashboard
   :config
-  (setq dashboard-items '((recents   . 5)
-                                (bookmarks . 5)
-                                (projects  . 5)
-                                (agenda    . 5)
-                                (registers . 5)))
+  (setq dashboard-center-content t
+        dashboard-vertically-center-content t
+        dashboard-projects-backend 'projectile
+        dashboard-icon-type 'all-the-icons
+        dashboard-items '((recents   . 5)
+                          (bookmarks . 5)
+                          (projects  . 5)
+                          (agenda    . 5)
+                          (registers . 5)))
   (dashboard-setup-startup-hook))
 #+END_SRC
 
@@ -302,7 +316,7 @@ Copied from megumacs
   :config
   (progn
     (setq treemacs-litter-directories              '("/node_modules" "/.venv" "/.cask")
-	  treemacs-width                           35
+	  treemacs-width                           45
 	  treemacs-no-png-images                   nil
 	  treemacs-workspace-switch-cleanup        t)
 
@@ -312,13 +326,6 @@ Copied from megumacs
     (treemacs-fringe-indicator-mode 'always)
     (when treemacs-python-executable
       (treemacs-git-commit-diff-mode t))
-
-    (pcase (cons (not (null (executable-find "git")))
-		 (not (null treemacs-python-executable)))
-      (`(t . t)
-       (treemacs-git-mode 'deferred))
-      (`(t . _)
-       (treemacs-git-mode 'simple)))
 
     (treemacs-hide-gitignored-files-mode nil))
 
@@ -388,9 +395,29 @@ Copied from megumacs
 #+END_SRC
 
 
+** [[https://github.com/akermu/emacs-libvterm][vterm]]
+#+BEGIN_SRC emacs-lisp
+(use-package vterm)
+(use-package multi-vterm
+  :config
+  (add-hook 'vterm-mode-hook
+			(lambda ()
+			  (setq-local evil-insert-state-cursor 'box)
+              (evil-insert-state))))
+#+END_SRC
+
+
+** [[https://github.com/vedang/pdf-tools][Pdf Tools]]
+#+BEGIN_SRC emacs-lisp
+(use-package pdf-tools
+  :config
+  (pdf-tools-install))
+#+END_SRC
+
+
 * Dev
 
-** [[https://github.com/minad/corfu][Corfu]]
+* [[https://github.com/minad/corfu][Corfu]]
 #+BEGIN_SRC emacs-lisp
 (use-package corfu
   :after orderless
@@ -430,30 +457,51 @@ Copied from megumacs
 
 ** [[https://github.com/joaotavora/yasnippet][Yasnippets]]
 #+BEGIN_SRC emacs-lisp
-(use-package yasnippet
-  :config (yas-global-mode 1))
+(use-package tempel
+  :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
+         ("M-*" . tempel-insert))
 
-(use-package yasnippet-snippets)
+  :init
 
-(use-package yasnippet-capf
-  :after cape
-  :config
-  (setq yasnippet-capf-lookup-by 'name))
+  ;; Setup completion at point
+  (defun tempel-setup-capf ()
+    ;; Add the Tempel Capf to `completion-at-point-functions'.
+    ;; `tempel-expand' only triggers on exact matches. Alternatively use
+    ;; `tempel-complete' if you want to see all matches, but then you
+    ;; should also configure `tempel-trigger-prefix', such that Tempel
+    ;; does not trigger too often when you don't expect it. NOTE: We add
+    ;; `tempel-expand' *before* the main programming mode Capf, such
+    ;; that it will be tried first.
+    (setq-local completion-at-point-functions
+                (cons #'tempel-expand
+                      completion-at-point-functions)))
 
-(add-to-list 'completion-at-point-functions #'yasnippet-capf)
+  (add-hook 'conf-mode-hook 'tempel-setup-capf)
+  (add-hook 'prog-mode-hook 'tempel-setup-capf)
+  (add-hook 'text-mode-hook 'tempel-setup-capf)
+
+  ;; Optionally make the Tempel templates available to Abbrev,
+  ;; either locally or globally. `expand-abbrev' is bound to C-x '.
+  (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
+  (global-tempel-abbrev-mode))
+
+(add-to-list 'completion-at-point-functions #'tempel-complete)
+
+;; Optional: Add tempel-collection.
+;; The package is young and doesn't have comprehensive coverage.
+(use-package tempel-collection)
 #+END_SRC
 
 
 ** [[https://github.com/renzmann/treesit-auto][Treesit]]
 #+BEGIN_SRC emacs-lisp
-(use-package treesit-auto
-  :custom
-  (treesit-auto-install 'prompt)
-  :config
-  (treesit-auto-add-to-auto-mode-alist 'all)
-  (global-treesit-auto-mode))
+;; (use-package treesit-auto
+;;   :custom
+;;   (treesit-auto-install 'prompt)
+;;   :config
+;;   (treesit-auto-add-to-auto-mode-alist 'all)
+;;   (global-treesit-auto-mode))
 #+END_SRC
-
 
 
 ** [[https://github.com/flycheck/flycheck][Flycheck]]
@@ -481,40 +529,22 @@ Copied from megumacs
 (use-package rust-mode
   :init
   (setq rust-mode-treesitter-derive t
-        rust-format-on-save t)
-  (setq lsp-rust-analyzer-cargo-watch-command "clippy"))
+        lsp-rust-analyzer-cargo-watch-command "clippy"))
 
-(use-package rustic
-  :after (rust-mode))
+ (use-package rustic
+   :after (rust-mode))
 
-(defun rustic-mode-auto-save-hook ()
-  "Enable auto-saving in rustic-mode buffers."
-  (when buffer-file-name
-    (setq-local compilation-ask-about-save nil)))
-(add-hook 'rustic-mode-hook 'rustic-mode-auto-save-hook)
-
-(use-package cargo
-  :hook (rustic . cargo-minor-mode))
-
+ (use-package cargo
+   :hook (rustic . cargo-minor-mode))
 #+END_SRC
 
 
 **** [[https://github.com/dominikh/go-mode.el][Go]]
 #+BEGIN_SRC emacs-lisp
-(use-package go-ts-mode
+(use-package go-mode
   :ensure nil
-  :hook
-  (go-ts-mode . lsp-deferred)
-  (go-ts-mode . (lambda ()
-                  (add-hook 'before-save-hook #'lsp-format-buffer t t)
-                  (add-hook 'before-save-hook #'lsp-organize-imports t t)))
-  :mode (("\\.go\\'" . go-ts-mode)
-         ("/go\\.mod\\'" . go-mod-ts-mode))
-  :init
-  (add-to-list 'treesit-language-source-alist '(go "https://github.com/tree-sitter/tree-sitter-go"))
-  (add-to-list 'treesit-language-source-alist '(gomod "https://github.com/camdencheek/tree-sitter-go-mod"))
+  :mode (("\\.go\\'" . go-mode))
   :custom
-  (lsp-go-use-gofumpt t)
   (go-ts-mode-indent-offset 4))
 #+END_SRC
 
@@ -544,49 +574,25 @@ Copied from megumacs
 #+BEGIN_SRC emacs-lisp
 (use-package lsp-mode
   :init
-  (setq read-process-output-max (* 1024 1024))
-
-  (setq lsp-enable-snippet t
-        lsp-eldoc-enable-hover nil
-        lsp-keymap-prefix "C-c l"
+  (setq lsp-keymap-prefix "C-c l"
         lsp-enable-folding nil
         lsp-enable-text-document-color t
         lsp-enable-on-type-formatting nil
         lsp-headerline-breadcrumb-enable nil
         lsp-completion-provider :none
-
-
-        lsp-semantic-tokens-enable t
-        lsp-semantic-tokens-max-concurrent-idle-requests 10
-
-        lsp-file-watch-ignored '("[/\\]node_modules/" "[/\\].git/" "[/\\]vendor/" "[/\\].direnv/" "[/\\].devenv/" "[/\\]target/"))
-
-  (setq lsp-log-io nil)
-
+        lsp-semantic-tokens-enable t)
   :hook ((lsp-mode . lsp-enable-which-key-integration)
-         (yaml-ts-mode . lsp-deferred)
-         (nix-ts-mode . lsp-deferred)
-         (protobuf-mode . lsp-deferred))
+         (go-mode . lsp-deferred))
   :commands (lsp lsp-deferred))
 
 ;; optionally
-(use-package lsp-ui
-  :after lsp-mode
-  :commands lsp-ui-mode
-  :init (setq lsp-ui-doc-enable t
-              lsp-ui-doc-show-with-cursor t
-              lsp-eldoc-enable-hover nil
-              lsp-ui-sideline-enable t
-              lsp-ui-flycheck-live-reporting t))
+(use-package lsp-ui :commands lsp-ui-mode)
 
 (with-eval-after-load 'lsp-mode
   (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]\\.direnv\\'")
   (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]\\.devenv\\'"))
-#+END_SRC
 
 
-*** [[https://github.com/blahgeek/emacs-lsp-booster][Lsp Booster]]
-#+BEGIN_SRC emacs-lisp
 (defun lsp-booster--advice-json-parse (old-fn &rest args)
   "Try to parse bytecode instead of json."
   (or
@@ -660,6 +666,7 @@ Copied from megumacs
   "." 'xref-find-definitions
   "," 'xref-pop-marker-stack
   "vt" 'vterm
+  "vT" 'multi-vterm
   "qq" 'evil-quit
   "gg" 'magit-status
 
@@ -719,7 +726,6 @@ Copied from megumacs
   "t" '(:ignore t :which-key "toggles")
   "tn" 'display-line-numbers-mode
   "tL" 'visual-line-mode
-  "tu" 'lsp-ui-mode
   "ti" 'highlight-indent-guides-mode
 
   ;; Themes
@@ -795,3 +801,5 @@ Copied from megumacs
   (read-extended-command-predicate #'command-completion-default-include-p)
   (text-mode-ispell-word-completion nil))
 #+end_src
+
+
