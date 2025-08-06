@@ -80,7 +80,7 @@ Copied from megumacs
 
 ** Tweaks
 #+BEGIN_SRC emacs-lisp
-(set-frame-parameter nil 'alpha-background 80)
+(set-frame-parameter nil 'alpha-background 90)
 
 (set-face-attribute 'default nil :font "Iosevka Nerd Font" :height 130)
 (custom-theme-set-faces
@@ -135,7 +135,7 @@ Copied from megumacs
 ** [[https://github.com/jdtsmith/indent-bars][Indent Bars]]
 #+BEGIN_SRC emacs-lisp
 (use-package indent-bars
-  :hook ((python-mode yaml-mode nix-mode rust-mode typescript-mode javascript-mode) . indent-bars-mode))
+  :hook (prog-mode . indent-bars-mode))
 #+END_SRC
 
 
@@ -241,10 +241,6 @@ Copied from megumacs
   :custom
   (org-modern-hide-stars nil)		; adds extra indentation
   (org-modern-table nil)
-  (org-modern-list
-   '(;; (?- . "-")
-     (?* . "•")
-     (?+ . "‣")))
   :hook
   (org-mode . org-modern-mode)
   (org-agenda-finalize . org-modern-agenda))
@@ -252,6 +248,8 @@ Copied from megumacs
 (use-package org-modern-indent
   :config
   (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
+
+(setq )
 #+END_SRC
 
 
@@ -417,28 +415,38 @@ Copied from megumacs
 
 * Dev
 
-* [[https://github.com/minad/corfu][Corfu]]
+** [[https://github.com/minad/corfu][Corfu]]
 #+BEGIN_SRC emacs-lisp
 (use-package corfu
   :after orderless
-  :custom
-  (corfu-auto t)
-  (corfu-auto-delay 0.2)
-  (corfu-on-exact-match nil)
-  (corfu-cycle t)
-  (corfu-preselect 'prompt)
-  (tab-always-indent 'complete)
-  (corfu-auto-prefix 1)
-  :hook ((prog-mode . corfu-mode)
-         (shell-mode . corfu-mode)
-         (eshell-mode . corfu-mode))
+  :config
+  (setq corfu-auto t
+        corfu-auto-delay 0.0
+        corfu-on-exact-match nil
+        corfu-cycle t
+        corfu-preselect 'prompt
+        tab-always-indent 'complete
+        corfu-auto-prefix 1
+        global-corfu-modes
+        '((not erc-mode
+               circe-mode
+               help-mode
+               gud-mode
+               vterm-mode)
+          t)
+        )
   :init
-  (global-corfu-mode)
-  (corfu-history-mode)
-  (corfu-popupinfo-mode))
+  (global-corfu-mode))
 
-(use-package nerd-icons-corfu)
-(add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
+(use-package nerd-icons-corfu
+  :after corfu
+  :init
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
+(use-package corfu-popupinfo
+  :hook ((corfu-mode . corfu-popupinfo-mode))
+  :config
+  (setq corfu-popupinfo-delay '(0.5 . 1.0)))
 #+END_SRC
 
 
@@ -457,39 +465,19 @@ Copied from megumacs
 
 ** [[https://github.com/joaotavora/yasnippet][Yasnippets]]
 #+BEGIN_SRC emacs-lisp
-(use-package tempel
-  :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
-         ("M-*" . tempel-insert))
+(use-package yasnippet
+  :config (yas-global-mode 1))
 
+(use-package yasnippet-snippets)
+
+(use-package yasnippet-capf
+  :after cape
   :init
-
-  ;; Setup completion at point
-  (defun tempel-setup-capf ()
-    ;; Add the Tempel Capf to `completion-at-point-functions'.
-    ;; `tempel-expand' only triggers on exact matches. Alternatively use
-    ;; `tempel-complete' if you want to see all matches, but then you
-    ;; should also configure `tempel-trigger-prefix', such that Tempel
-    ;; does not trigger too often when you don't expect it. NOTE: We add
-    ;; `tempel-expand' *before* the main programming mode Capf, such
-    ;; that it will be tried first.
-    (setq-local completion-at-point-functions
-                (cons #'tempel-expand
-                      completion-at-point-functions)))
-
-  (add-hook 'conf-mode-hook 'tempel-setup-capf)
-  (add-hook 'prog-mode-hook 'tempel-setup-capf)
-  (add-hook 'text-mode-hook 'tempel-setup-capf)
-
-  ;; Optionally make the Tempel templates available to Abbrev,
-  ;; either locally or globally. `expand-abbrev' is bound to C-x '.
-  (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
-  (global-tempel-abbrev-mode))
-
-(add-to-list 'completion-at-point-functions #'tempel-complete)
-
-;; Optional: Add tempel-collection.
-;; The package is young and doesn't have comprehensive coverage.
-(use-package tempel-collection)
+  (defun my/yasnippet-capf-h ()
+    (add-to-list 'completion-at-point-functions #'yasnippet-capf))
+  :hook
+  ((prog-mode . my/yasnippet-capf-h)
+   (org-mode . my/yasnippet-capf-h)))
 #+END_SRC
 
 
@@ -558,21 +546,33 @@ Copied from megumacs
 #+END_SRC
 
 
-**** [[idk][Protobuf Mode]]
-#+BEGIN_SRC emacs-lisp
-(use-package protobuf-mode)
-#+END_SRC
 
-
-**** [[https://github.com/nix-community/nix-ts-mode][Nix Ts Mode]]
+**** Some syntax highlighting
 #+BEGIN_SRC emacs-lisp
-(use-package nix-ts-mode)
+(use-package protobuf-mode
+  :mode ("\\.proto\\'"))
+
+(use-package nix-ts-mode
+  :mode ("\\.nix\\'" . nix-ts-mode))
+
+(use-package yaml-ts-mode
+  :ensure nil
+  :mode ("\\.y[a]?ml\\'"))
+
+(use-package json-ts-mode
+  :ensure nil
+  :mode ("\\.json\\'"))
+
+(use-package dockerfile-ts-mode
+  :ensure nil
+  :mode ("\\Dockerfile\\'"))
 #+END_SRC
 
 
 *** [[https://github.com/flycheck/flycheck][Lsp Mode]]
 #+BEGIN_SRC emacs-lisp
 (use-package lsp-mode
+  :after (direnv)
   :init
   (setq lsp-keymap-prefix "C-c l"
         lsp-enable-folding nil
@@ -580,49 +580,64 @@ Copied from megumacs
         lsp-enable-on-type-formatting nil
         lsp-headerline-breadcrumb-enable nil
         lsp-completion-provider :none
+        lsp-idle-delay 0.1
+
+        lsp-semantic-tokens-max-concurrent-idle-requests 100
         lsp-semantic-tokens-enable t)
-  :hook ((lsp-mode . lsp-enable-which-key-integration)
-         (go-mode . lsp-deferred))
+  :hook ((nix-ts-mode . lsp-deferred)
+         (protobuf-mode . lsp-deferred)
+         (yaml-ts-mode . lsp-deferred)
+         (json-ts-mode . lsp-deferred)
+         (dockerfile-ts-mode . lsp-deferred)
+         (go-mode . lsp-deferred)
+         (lsp-mode . lsp-enable-which-key-integration))
   :commands (lsp lsp-deferred))
 
 ;; optionally
-(use-package lsp-ui :commands lsp-ui-mode)
+(use-package lsp-ui :commands lsp-ui-mode
+  :config
+  (setq lsp-ui-sideline-enable t
+        lsp-ui-flycheck-enable t
+        lsp-ui-flycheck-live-reporting t
+        lsp-ui-sideline-toggle-symbols-info t
+        lsp-ui-sideline-show-hover t
+        lsp-ui-peek-enable t))
 
 (with-eval-after-load 'lsp-mode
   (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]\\.direnv\\'")
   (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]\\.devenv\\'"))
 
 
-(defun lsp-booster--advice-json-parse (old-fn &rest args)
-  "Try to parse bytecode instead of json."
-  (or
-   (when (equal (following-char) ?#)
-     (let ((bytecode (read (current-buffer))))
-       (when (byte-code-function-p bytecode)
-         (funcall bytecode))))
-   (apply old-fn args)))
-(advice-add (if (progn (require 'json)
-                       (fboundp 'json-parse-buffer))
-                'json-parse-buffer
-              'json-read)
-            :around
-            #'lsp-booster--advice-json-parse)
-
-(defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
-  "Prepend emacs-lsp-booster command to lsp CMD."
-  (let ((orig-result (funcall old-fn cmd test?)))
-    (if (and (not test?)                             ;; for check lsp-server-present?
-             (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
-             lsp-use-plists
-             (not (functionp 'json-rpc-connection))  ;; native json-rpc
-             (executable-find "emacs-lsp-booster"))
-        (progn
-          (when-let ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
-            (setcar orig-result command-from-exec-path))
-          (message "Using emacs-lsp-booster for %s!" orig-result)
-          (cons "emacs-lsp-booster" orig-result))
-      orig-result)))
-(advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
+;; (defun lsp-booster--advice-json-parse (old-fn &rest args)
+;;   "Try to parse bytecode instead of json."
+;;   (or
+;;    (when (equal (following-char) ?#)
+;;      (let ((bytecode (read (current-buffer))))
+;;        (when (byte-code-function-p bytecode)
+;;          (funcall bytecode))))
+;;    (apply old-fn args)))
+;; (advice-add (if (progn (require 'json)
+;;                        (fboundp 'json-parse-buffer))
+;;                 'json-parse-buffer
+;;               'json-read)
+;;             :around
+;;             #'lsp-booster--advice-json-parse)
+;; 
+;; (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
+;;   "Prepend emacs-lsp-booster command to lsp CMD."
+;;   (let ((orig-result (funcall old-fn cmd test?)))
+;;     (if (and (not test?)                             ;; for check lsp-server-present?
+;;              (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
+;;              lsp-use-plists
+;;              (not (functionp 'json-rpc-connection))  ;; native json-rpc
+;;              (executable-find "emacs-lsp-booster"))
+;;         (progn
+;;           (when-let ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
+;;             (setcar orig-result command-from-exec-path))
+;;           (message "Using emacs-lsp-booster for %s!" orig-result)
+;;           (cons "emacs-lsp-booster" orig-result))
+;;       orig-result)))
+;; (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
 #+END_SRC
 
 
@@ -722,11 +737,11 @@ Copied from megumacs
   "pp" 'projectile-switch-project
   "pf" 'projectile-find-file
 
-  ;; Toggles
-  "t" '(:ignore t :which-key "toggles")
-  "tn" 'display-line-numbers-mode
-  "tL" 'visual-line-mode
-  "ti" 'highlight-indent-guides-mode
+  ;; Tabsbsbsbsbs
+  "t" '(:ignore t :which-key "tab")
+  "tn" 'tab-next
+  "tb" 'tab-previous
+  "tT" 'tab-new
 
   ;; Themes
   "tt" 'consult-theme
@@ -789,6 +804,14 @@ Copied from megumacs
   (projectile-mode))
 
 (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+
+(use-package winum
+  :straight t
+  :defer 0.5
+  :custom
+  (winum-auto-setup-mode-line nil)
+  :config
+  (winum-mode))
 
 (use-package emacs
   :custom
