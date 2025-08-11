@@ -19,7 +19,7 @@
           config = ./emacs.org;
           defaultInitFile = true;
 
-          package = pkgs.emacs-pgtk;
+          package = pkgs.emacs;
 
           alwaysEnsure = true;
           alwaysTangle = true;
@@ -45,6 +45,11 @@
               inherit (epkgs) melpaBuild lsp-mode;
             };
 
+            doom-modeline-exwm = pkgs.emacsPackages.callPackage ./custom/doom-modeline-exwm.nix {
+              inherit (pkgs) fetchFromGitHub;
+              inherit (epkgs) melpaBuild exwm doom-modeline;
+            };
+
             # lsp-mode = epkgs.lsp-mode.overrideAttrs (old: {
             #   buildPhase = ''
             #     export LSP_USE_PLISTS=true
@@ -56,14 +61,17 @@
             # custom packages
             epkgs.org-modern-indent
             epkgs.ultra-scroll
-            epkgs.lsp-mode
+            # epkgs.lsp-mode
             epkgs.zen-mode
             epkgs.lsp-biome
+            epkgs.doom-modeline-exwm
 
             epkgs.treesit-grammars.with-all-grammars
             epkgs.vterm
+            epkgs.exwm
+            epkgs.counsel
 
-            pkgs.emacs-lsp-booster
+            # pkgs.emacs-lsp-booster
             pkgs.rust-analyzer
             pkgs.yaml-language-server
             pkgs.nixd
@@ -72,6 +80,7 @@
             pkgs.buf
             pkgs.docker-language-server
             pkgs.nodePackages.vscode-json-languageserver
+            pkgs.elixir-ls
 
             # export pdf
             pkgs.pandoc

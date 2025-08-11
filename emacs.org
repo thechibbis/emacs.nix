@@ -40,14 +40,13 @@ Copied from megumacs
  inhibit-startup-screen t                         ; Disable start-up screen
  initial-scratch-message ""                       ; Empty the initial *scratch* buffer
  mouse-yank-at-point t                            ; Yank at point rather than pointer
- ns-use-srgb-colorspace nil                       ; Don't use sRGB colors
  select-enable-clipboard t                        ; Merge system's and Emacs' clipboard
  sentence-end-double-space nil                    ; End a sentence after a dot and a space
  show-help-function nil                           ; Disable help messages
  show-trailing-whitespace t                       ; Display trailing whitespaces
  tab-width 4                                      ; Set width for tabs
+ line-spacing 0.25
  uniquify-buffer-name-style 'forward              ; Uniquify buffer names
- window-combination-resize t                      ; Resize windows proportionally
  delete-old-versions -1                           ; Delete excess backup versions silently
  version-control t                                ; Use version control
  ring-bell-function 'ignore                       ; Silent bell when you make a mistake
@@ -56,6 +55,7 @@ Copied from megumacs
  make-backup-files nil                            ; Stop creating backup files
  display-line-numbers-type 'relative              ; Use relative line numbers
  vc-follow-symlinks t                             ; When the symlink points to a version-controlled file
+ window-resize-freely t
  use-default-font-for-symbols nil                 ; Do not use the frame font when rendering emojis
  frame-inhibit-implied-resize nil)                ; Don't ask for confirmation when opening symlinked file
 (cd "~/")                                         ; Move to the user directory
@@ -81,12 +81,11 @@ Copied from megumacs
 ** Tweaks
 #+BEGIN_SRC emacs-lisp
 (set-frame-parameter nil 'alpha-background 90)
-
-(set-face-attribute 'default nil :font "Iosevka Nerd Font" :height 130)
+(set-face-attribute 'default nil :font "FantasqueSansM Nerd Font Mono" :height 130)
 (custom-theme-set-faces
  'user
- '(variable-pitch ((t (:family "Fira Code" :height 200))))
- '(fixed-pitch ((t ( :family "Iosevka Nerd Font" :height 130)))))
+ '(variable-pitch ((t (:family "FantasqueSansM Nerd Font" :height 180))))
+ '(fixed-pitch ((t ( :family "FantasqueSansM Nerd Font Mono" :height 130)))))
 
 (custom-theme-set-faces
  'user
@@ -109,6 +108,16 @@ Copied from megumacs
 
 ** [[https://github.com/protesilaos/modus-themes][Modus Themes - GOAT]]
 #+BEGIN_SRC emacs-lisp
+(use-package doom-themes
+  :ensure t
+  :custom
+  (doom-themes-enable-bold t)   ; if nil, bold is universally disabled
+  (doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (doom-themes-treemacs-theme "doom-atom")
+  :config
+  (doom-themes-visual-bell-config)
+  (doom-themes-treemacs-config))
+
 (require-theme 'modus-themes)
 
 (setq modus-themes-common-palette-overrides
@@ -118,17 +127,20 @@ Copied from megumacs
         (fg-line-number-active fg-main)
         (bg-line-number-inactive unspecified)
         (bg-line-number-active unspecified)))
-(load-theme 'modus-vivendi-tinted)
+
+(load-theme 'modus-vivendi)
 #+END_SRC
 
 
 ** [[https://github.com/seagle0128/doom-modeline][Doom Modeline]]
 #+BEGIN_SRC emacs-lisp
-(use-package doom-modeline
-  :config
-  (setq doom-modeline-height 30
-        doom-modeline-buffer-file-name-style 'file-name)
-  :hook (after-init . doom-modeline-mode))
+;; (use-package doom-modeline
+;;   :config
+;;   (setq doom-modeline-height 30
+;;         doom-modeline-buffer-file-name-style 'file-name
+;;         doom-modeline-always-visible-segments '(workspace-name exwm-workspaces))
+;; 
+;;   :hook (after-init . doom-modeline-mode))
 #+END_SRC
 
 
@@ -151,49 +163,35 @@ Copied from megumacs
 ** [[https://orgmode.org/][Org]]
 #+BEGIN_SRC emacs-lisp
 (add-hook 'org-mode-hook 'visual-line-mode)
-
 (add-hook 'org-mode-hook 'variable-pitch-mode)
 
-  (use-package org
-    :defer t
-    :config
-    (setq org-adapt-indentation t
-          org-hide-leading-stars nil
-          org-hide-emphasis-markers t
-          org-pretty-entities t
-          org-src-fontify-natively t
-          org-startup-folded t
-          org-adapt-indentation t
-          org-edit-src-content-indentation 0
-          org-src-fontify-natively t
-          org-src-tab-acts-natively t
-          org-startup-indented t
-          org-indent-indentation-per-level 2
-          org-edit-src-content-indentation 0
-          org-auto-align-tags nil
-          org-tags-column 0
-          org-fold-catch-invisible-edits 'show-and-error
-          org-special-ctrl-a/e t
-          org-insert-heading-respect-content t
+(use-package org
+  :defer t
+  :config
+  (setq org-adapt-indentation t
+        org-hide-leading-stars nil
+        org-hide-emphasis-markers t
+        org-pretty-entities t
+        org-src-fontify-natively t
+        org-startup-folded t
+        org-adapt-indentation t
+        org-edit-src-content-indentation 0
+        org-src-fontify-natively t
+        org-src-tab-acts-natively t
+        org-startup-indented t
+        org-indent-indentation-per-level 2
+        org-edit-src-content-indentation 0
+        org-auto-align-tags nil
+        org-tags-column 0
+        org-fold-catch-invisible-edits 'show-and-error
+        org-special-ctrl-a/e t
+        org-insert-heading-respect-content t
+        org-agenda-files '("~/org-files/")
+        org-todo-keywords
+        '((sequence "TODO(t)" "ONGOING(o)" "|" "DONE(d!)")
+          (sequence "BACKLOG(b)" "PLAN(p)" "READY(r)" "ACTIVE(a)" "REVIEW(v)" "WAIT(w@/!)" "HOLD(h)" "|" "COMPLETED(c)" "CANC(k@)"))))
 
-          ;; Agenda styling
-          org-agenda-tags-column 0
-          org-agenda-time-grid
-          '((daily today require-timed)
-            (800 1000 1200 1400 1600 1800 2000)
-            " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
-          org-agenda-current-time-string
-          "⭠ now ─────────────────────────────────────────────────")
-
-    (custom-set-faces
-     '(org-document-title ((t (:inherit outline-1 :height 1.75))))
-     '(org-level-1 ((t (:inherit outline-1 :height 1.5))))
-     '(org-level-2 ((t (:inherit outline-2 :height 1.25))))
-     '(org-level-3 ((t (:inherit outline-3 :height 1.125))))
-     '(org-level-4 ((t (:inherit outline-4 :height 1.0625))))
-     '(org-level-5 ((t (:inherit outline-5 :height 1.03125))))))
-
-  (global-prettify-symbols-mode t)
+(global-prettify-symbols-mode t)
 #+END_SRC
 
 
@@ -237,10 +235,11 @@ Copied from megumacs
 
 (use-package org-modern
   :after org
-  :config (global-org-modern-mode 1)
-  :custom
-  (org-modern-hide-stars nil)		; adds extra indentation
-  (org-modern-table nil)
+  :config
+  (setq org-modern-hide-stars t
+        org-modern-table t)
+
+  (global-org-modern-mode 1)
   :hook
   (org-mode . org-modern-mode)
   (org-agenda-finalize . org-modern-agenda))
@@ -248,8 +247,6 @@ Copied from megumacs
 (use-package org-modern-indent
   :config
   (add-hook 'org-mode-hook #'org-modern-indent-mode 90))
-
-(setq )
 #+END_SRC
 
 
@@ -258,6 +255,45 @@ Copied from megumacs
 (use-package ox-pandoc)
 #+END_SRC
 
+
+** Org Agenda
+#+BEGIN_SRC emacs-lisp
+(setq org-agenda-remove-tags t)
+(setq org-agenda-block-separator 32)
+(setq org-agenda-custom-commands
+      '(("d" "Dashboard"
+         (
+          (tags "PRIORITY=\"A\""
+                ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                 (org-agenda-overriding-header "\n HIGHEST PRIORITY")
+                 (org-agenda-prefix-format "   %i %?-2 t%s")
+                 )
+                )
+          (agenda ""
+                  (
+                   (org-agenda-start-day "+0d")
+                   (org-agenda-span 1)
+                   (org-agenda-time)
+                   (org-agenda-remove-tags t)
+                   (org-agenda-todo-keyword-format "")
+                   (org-agenda-scheduled-leaders '("" ""))
+                   (org-agenda-current-time-string "ᐊ┈┈┈┈┈┈┈┈┈ NOW")
+                   (org-agenda-overriding-header "\n TODAY'S SCHEDULE")
+                   (org-agenda-prefix-format "   %i %?-2 t%s")
+                   )
+                  )
+          (tags-todo  "-STYLE=\"habit\""
+                      (
+                       (org-agenda-overriding-header "\n ALL TODO")
+                       (org-agenda-sorting-strategy '(priority-down))
+                       (org-agenda-remove-tags t)
+                       (org-agenda-prefix-format "   %i %?-2 t%s")
+                       )
+                      )))))
+
+(setq org-agenda-scheduled-leaders '("" ""))
+(setq org-agenda-include-diary nil)
+#+END_SRC
 
 
 * Packages
@@ -292,12 +328,14 @@ Copied from megumacs
 ** [[https://github.com/minad/vertico][Vertico]]
 #+BEGIN_SRC emacs-lisp
 (use-package vertico)
-(use-package vertico-posframe)
 (use-package all-the-icons-completion)
+
+(use-package vertico-posframe
+  :after vertico
+  :config (vertico-posframe-mode 1))
 
 (use-package consult)
 
-(vertico-posframe-mode 1)
 (all-the-icons-completion-mode)
 (vertico-mode)
 (savehist-mode)
@@ -413,53 +451,46 @@ Copied from megumacs
 #+END_SRC
 
 
+** Perspective
+#+BEGIN_SRC emacs-lisp
+;; I actually set the bindings through exwm
+(use-package perspective
+  :ensure t  ; use `:straight t` if using straight.el!
+  :bind (("C-x k" . persp-kill-buffer*))
+  :init
+  (setq persp-suppress-no-prefix-key-warning t)
+  (persp-mode))
+#+END_SRC
+
+
 * Dev
 
 ** [[https://github.com/minad/corfu][Corfu]]
 #+BEGIN_SRC emacs-lisp
-(use-package corfu
-  :after orderless
+(use-package company
+  :defer 0.5
+  :delight
+  :init (global-company-mode)
+  :custom
+  (company-begin-commands '(self-insert-command))
+  (company-minimum-prefix-length 1)
+  (company-idle-delay 0.0)
+  (company-tooltip-limit 15)
+  (company-show-numbers t)
+  (company-tooltip-align-annotations t)
+  (company-require-match 'never)
+  (company-dabbrev-other-buffers nil)
   :config
-  (setq corfu-auto t
-        corfu-auto-delay 0.0
-        corfu-on-exact-match nil
-        corfu-cycle t
-        corfu-preselect 'prompt
-        tab-always-indent 'complete
-        corfu-auto-prefix 1
-        global-corfu-modes
-        '((not erc-mode
-               circe-mode
-               help-mode
-               gud-mode
-               vterm-mode)
-          t)
-        )
-  :init
-  (global-corfu-mode))
+  (add-to-list 'company-backends
+               '(company-yasnippet
+                 company-files
+                 company-keywords
+                 company-capf
+                 company-dabbrev
+                 company-dabbrev-code)))
 
-(use-package nerd-icons-corfu
-  :after corfu
-  :init
-  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
-
-(use-package corfu-popupinfo
-  :hook ((corfu-mode . corfu-popupinfo-mode))
-  :config
-  (setq corfu-popupinfo-delay '(0.5 . 1.0)))
-#+END_SRC
-
-
-** [[https://github.com/minad/cape][Cape]]
-#+BEGIN_SRC emacs-lisp
-(use-package cape
-  :bind ("C-c p" . cape-prefix-map)
-  :init
-  (add-hook 'complete-at-point-functions #'company-yasnippet)
-  (add-hook 'completion-at-point-functions #'cape-dabbrev)
-  (add-hook 'completion-at-point-functions #'cape-file)
-  (add-hook 'completion-at-point-functions #'cape-elisp-block)
-  (add-hook 'completion-at-point-functions #'cape-history))
+(use-package company-box
+  :hook (company-mode . company-box-mode))
 #+END_SRC
 
 
@@ -469,15 +500,6 @@ Copied from megumacs
   :config (yas-global-mode 1))
 
 (use-package yasnippet-snippets)
-
-(use-package yasnippet-capf
-  :after cape
-  :init
-  (defun my/yasnippet-capf-h ()
-    (add-to-list 'completion-at-point-functions #'yasnippet-capf))
-  :hook
-  ((prog-mode . my/yasnippet-capf-h)
-   (org-mode . my/yasnippet-capf-h)))
 #+END_SRC
 
 
@@ -495,7 +517,7 @@ Copied from megumacs
 ** [[https://github.com/flycheck/flycheck][Flycheck]]
 #+BEGIN_SRC emacs-lisp
 (use-package flycheck
-  :after (direnv-mode)
+  :after (direnv)
   :config
   (setq flycheck-display-errors-delay 0.25
         flycheck-buffer-switch-check-intermediate-buffers t)
@@ -504,7 +526,7 @@ Copied from megumacs
 	      ("M-n" . flycheck-next-error) ; optional but recommended error navigation
 	      ("M-p" . flycheck-previous-error)))
 
-(add-hook 'after-init-hook #'global-flycheck-mode)
+(add-hook 'afterinit-hook #'global-flycheck-mode)
 #+END_SRC
 
 
@@ -546,6 +568,11 @@ Copied from megumacs
 #+END_SRC
 
 
+**** Lsp Biome
+#+BEGIN_SRC emacs-lisp
+(use-package lsp-biome)
+#+END_SRC
+
 
 **** Some syntax highlighting
 #+BEGIN_SRC emacs-lisp
@@ -566,13 +593,36 @@ Copied from megumacs
 (use-package dockerfile-ts-mode
   :ensure nil
   :mode ("\\Dockerfile\\'"))
+
+(use-package elixir-ts-mode
+  :ensure nil
+  :mode ("\\.elixir\\'"
+         "\\.ex\\'"
+         "\\.exs\\'"
+         "mix\\.lock"))
+
+(use-package tsx-ts-mode
+  :ensure nil
+  :mode ("\\.tsx\\'"
+         "\\.jsx\\'"))
+
+(use-package typescript-ts-mode
+  :ensure nil
+  :mode ("\\.ts\\'"
+         "\\.js\\'"
+         "\\.mjs\\'"
+         "\\.mts\\'"
+         "\\.cjs\\'"))
+
+(use-package prisma-ts-mode
+  :ensure nil
+  :mode ("\\.prisma\\'"))
 #+END_SRC
 
 
 *** [[https://github.com/flycheck/flycheck][Lsp Mode]]
 #+BEGIN_SRC emacs-lisp
 (use-package lsp-mode
-  :after (direnv)
   :init
   (setq lsp-keymap-prefix "C-c l"
         lsp-enable-folding nil
@@ -580,7 +630,7 @@ Copied from megumacs
         lsp-enable-on-type-formatting nil
         lsp-headerline-breadcrumb-enable nil
         lsp-completion-provider :none
-        lsp-idle-delay 0.1
+        lsp-idle-delay 0.5
 
         lsp-semantic-tokens-max-concurrent-idle-requests 100
         lsp-semantic-tokens-enable t)
@@ -590,7 +640,15 @@ Copied from megumacs
          (json-ts-mode . lsp-deferred)
          (dockerfile-ts-mode . lsp-deferred)
          (go-mode . lsp-deferred)
+         ((tsx-ts-mode
+           typescript-ts-mode
+           js-ts-mode) . lsp-deferred)
          (lsp-mode . lsp-enable-which-key-integration))
+  :config
+  (lsp-register-client (make-lsp-client
+                        :new-connection (lsp-stdio-connection "elixir-ls")
+                        :activation-fn (lsp-activate-on "elixir")
+                        :server-id 'elixir-ls))
   :commands (lsp lsp-deferred))
 
 ;; optionally
@@ -606,38 +664,6 @@ Copied from megumacs
 (with-eval-after-load 'lsp-mode
   (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]\\.direnv\\'")
   (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]\\.devenv\\'"))
-
-
-;; (defun lsp-booster--advice-json-parse (old-fn &rest args)
-;;   "Try to parse bytecode instead of json."
-;;   (or
-;;    (when (equal (following-char) ?#)
-;;      (let ((bytecode (read (current-buffer))))
-;;        (when (byte-code-function-p bytecode)
-;;          (funcall bytecode))))
-;;    (apply old-fn args)))
-;; (advice-add (if (progn (require 'json)
-;;                        (fboundp 'json-parse-buffer))
-;;                 'json-parse-buffer
-;;               'json-read)
-;;             :around
-;;             #'lsp-booster--advice-json-parse)
-;; 
-;; (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
-;;   "Prepend emacs-lsp-booster command to lsp CMD."
-;;   (let ((orig-result (funcall old-fn cmd test?)))
-;;     (if (and (not test?)                             ;; for check lsp-server-present?
-;;              (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
-;;              lsp-use-plists
-;;              (not (functionp 'json-rpc-connection))  ;; native json-rpc
-;;              (executable-find "emacs-lsp-booster"))
-;;         (progn
-;;           (when-let ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
-;;             (setcar orig-result command-from-exec-path))
-;;           (message "Using emacs-lsp-booster for %s!" orig-result)
-;;           (cons "emacs-lsp-booster" orig-result))
-;;       orig-result)))
-;; (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
 #+END_SRC
 
 
@@ -647,8 +673,9 @@ Copied from megumacs
 #+BEGIN_SRC emacs-lisp
 (use-package evil
   :init
-  (setq evil-want-integration t)
-  (setq evil-want-keybinding nil)
+  (setq evil-want-integration t
+        evil-want-keybinding nil
+        evil-auto-balance-windows nil)
   :config
   (evil-mode 1))
 
@@ -688,7 +715,6 @@ Copied from megumacs
   ;; Applications
   "a" '(:ignore t :which-key "applications")
   "au" 'undo-tree-visualize
-  "aU" 'straight-pull-all
   "ac" 'cfw:open-org-calendar
   
   ;; Buffers
@@ -786,9 +812,17 @@ Copied from megumacs
 
 * IDK WHERE TO PUT
 #+begin_src emacs-lisp
+(use-package visual-fill-column)
+(defun cbb/org-mode-visual-fill ()
+  (setq visual-fill-column-width 150
+        visual-fill-column-center-text t)
+  (visual-fill-column-mode 1))
+
+(use-package visual-fill-column
+  :hook (org-mode . cbb/org-mode-visual-fill))
+
 (use-package rainbow-mode
-  :config
-  rainbow-mode)
+  :config (rainbow-mode))
 
 (use-package direnv
   :config
@@ -797,16 +831,12 @@ Copied from megumacs
 (use-package zen-mode)
 
 (use-package projectile
-  :custom
-  (projectile-enable-caching t)
-  :config
-  (setq projectile-indexing-method 'alien)
-  (projectile-mode))
+  :init
+  (projectile-mode 1))
 
 (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
 
 (use-package winum
-  :straight t
   :defer 0.5
   :custom
   (winum-auto-setup-mode-line nil)
@@ -823,6 +853,141 @@ Copied from megumacs
   (tab-always-indent 'complete)
   (read-extended-command-predicate #'command-completion-default-include-p)
   (text-mode-ispell-word-completion nil))
+
+(defun toggle-window-dedicated ()
+  "Toggle whether the current active window is dedicated or not"
+  (interactive)
+  (message 
+   (if (let (window (get-buffer-window (current-buffer)))
+	 (set-window-dedicated-p window 
+    				 (not (window-dedicated-p window))))
+       "Window '%s' is dedicated"
+     "Window '%s' is normal")
+   (current-buffer)))
 #+end_src
+
+
+* EXWM
+** Apps
+#+BEGIN_SRC emacs-lisp
+(defun cbb/discord()
+  (interactive)
+  (start-process-shell-command "discord" nil "discord"))
+
+(defun cbb/spotify()
+  (interactive)
+  (start-process-shell-command "spotify" nil "spotify"))
+
+(defun cbb/zen()
+  (interactive)
+  (start-process-shell-command "zen" nil "zen"))
+
+(defun cbb/easyeffects()
+  (interactive)
+  (start-process-shell-command "easyeffects" nil "easyeffects"))
+
+(defun cbb/feh ()
+  (interactive)
+  (start-process-shell-command
+   "feh" nil  "feh --bg-scale $HOME/.wallpaper.jpg"))
+#+END_SRC
+
+** Exwm
+#+begin_src emacs-lisp
+(defun cbb/run-in-background (command)
+  (let ((command-parts (split-string command "[ ]+")))
+    (apply #'call-process `(,(car command-parts) nil 0 nil ,@(cdr command-parts)))))
+
+(defun cbb/exwm-init-hook ()
+  (exwm-workspace-switch-create 1)
+
+  (setq display-time-day-and-date t)
+  (display-time-mode 1)
+
+  (cbb/run-in-background "picom")
+  (cbb/run-in-background "flameshot")
+  (cbb/run-in-background "dunst")
+  (cbb/run-in-background "pasystray")
+  (cbb/run-in-background "blueman-applet"))
+
+(defun cbb/exwm-update-class ()
+  (exwm-workspace-rename-buffer exwm-class-name))
+
+(use-package exwm
+  :config
+  (setq exwm-workspace-show-all-buffers t)
+  (setq exwm-layout-show-all-buffers t)
+  (setq exwm-workspace-number 9)
+
+  (add-hook 'exwm-update-class-hook #'cbb/exwm-update-class)
+
+  (add-hook 'exwm-init-hook #'cbb/exwm-init-hook)
+
+  (add-hook 'exwm-input--input-mode-change-hook
+            'force-mode-line-update)
+
+  (add-hook 'exwm-mode-hook
+            (lambda ()
+              (evil-local-set-key 'motion (kbd "C-U") nil)))
+
+  (require 'exwm-randr)
+  (exwm-randr-mode)
+  (start-process-shell-command "xrandr" nil "xrandr --output HDMI-0 --primary --mode 3840x2160 --pos 0x0 --rotate normal")
+
+  (cbb/feh)
+  ;; (cbb/discord)
+  ;; (cbb/spotify)
+  ;; (cbb/zen)
+  ;; (cbb/easyeffects)
+
+  (require 'exwm-systemtray)
+  (setq exwm-systemtray-height 32)
+  (exwm-systemtray-mode)
+
+  (setq exwm-input-prefix-keys
+        '(?\C-x
+          ?\C-u
+          ?\C-h
+          ?\M-x
+          ?\M-`
+          ?\M-&
+          ?\M-:
+          ?\C-\M-j
+          ?\C-\ ))
+
+  (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
+
+  (exwm-input-set-key (kbd "s-r") #'exwm-reset)
+  (exwm-input-set-key (kbd "s-w") #'exwm-workspace-swap)
+  (exwm-input-set-key (kbd "s-SPC") 'counsel-linux-app)
+
+  (exwm-input-set-key (kbd "s-t") 'tab-new)
+  (exwm-input-set-key (kbd "s-b") 'consult-buffer)
+
+
+  (exwm-input-set-key (kbd "s-w") 'persp-switch)
+  (exwm-input-set-key (kbd "s-a") 'persp-add-buffer)
+  (exwm-input-set-key (kbd "s-A") 'persp-set-buffer)
+  (exwm-input-set-key (kbd "s-k") 'persp-remove)
+
+  (exwm-input-set-key (kbd "s-q") 'kill-buffer)
+  (exwm-input-set-key (kbd "s-Q") 'persp-kill)
+
+  ;; the next loop will bind s-<number> to switch to the corresponding workspace
+  (dotimes (i 9)
+    (exwm-input-set-key (kbd (format "s-%d" (1+ i)))
+                        `(lambda ()
+                           (interactive)
+                           (exwm-workspace-switch-create ,(1+ i)))))
+
+  ;; the simplest launcher, I keep it in only if dmenu eventually stopped working or something
+  (exwm-input-set-key (kbd "s-&")
+                      (lambda (command)
+                        (interactive (list (read-shell-command "$ ")))
+                        (start-process-shell-command command nil command)))
+
+  (exwm-wm-mode))
+#+end_src
+
 
 
