@@ -457,8 +457,9 @@ Copied from megumacs
 (use-package perspective
   :ensure t  ; use `:straight t` if using straight.el!
   :bind (("C-x k" . persp-kill-buffer*))
+  :custom
+  (persp-mode-prefix-key (kbd "C-c M-p"))
   :init
-  (setq persp-suppress-no-prefix-key-warning t)
   (persp-mode))
 #+END_SRC
 
@@ -754,7 +755,7 @@ Copied from megumacs
   "vff" 'lsp-format-buffer
   "vrn" 'lsp-rename
   "vrr" 'lsp-ui-peek-find-references
-  "gd"  'lsp-find-declaration
+  "gd"  'lsp-find-definition
   "gD"  'lsp-find-implementation
   "K"   'lsp-ui-doc-glance
   "ll"  'lsp-ui-flycheck-list
@@ -965,7 +966,7 @@ Copied from megumacs
   (exwm-input-set-key (kbd "s-b") 'consult-buffer)
 
 
-  (exwm-input-set-key (kbd "s-w") 'persp-switch)
+  (exwm-input-set-key (kbd "s-W") 'persp-switch)
   (exwm-input-set-key (kbd "s-a") 'persp-add-buffer)
   (exwm-input-set-key (kbd "s-A") 'persp-set-buffer)
   (exwm-input-set-key (kbd "s-k") 'persp-remove)
